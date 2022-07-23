@@ -3,7 +3,7 @@
   color: white;
   height: 10rem;
 
-  h1 {
+  h1,h2,h3 {
     display: flex;
     justify-items: center;
     justify-content: flex-start;
@@ -47,5 +47,13 @@
 .segment {
   ion-label {
     font-family: "Calistoga";
+  }
+}
+.spinner {
+  height: 100%;
+  align-content: center;
+  ion-spinner {
+    width: 100%;
+    height: 5rem;
   }
 }

@@ -81,7 +81,7 @@ const RecipeCard: React.FC<ContainerProps> = ({ recipe, index }) => {
     <IonCard className={styles.card} key={index}>
       <div className={styles.header} onClick={() => present(modalOptions)}>
         <img src={recipe.image} alt="drink type" />
-        <h1>{recipe.name}</h1>
+        <h3>{recipe.name}</h3>
       </div>
       <IonCardContent className={styles.content}>
         <IonRow className={styles.cardRow}>

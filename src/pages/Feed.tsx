@@ -12,6 +12,7 @@ import {
   IonSegment,
   IonSegmentButton,
   IonButtons,
+  IonSpinner,
 } from "@ionic/react";
 import axios from "axios";
 import { caretBack } from "ionicons/icons";
@@ -28,6 +29,7 @@ import BrandHeader from "../components/BrandHeader";
 const Feed: React.FC = () => {
   const [query, setQuery] = useState(null);
   const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
   // const [tags, setTags] = useState<any>({});
   // const [categories, setCategories] = useState<any>({});
   const categories = FeedStore.useState(getCategories);
@@ -57,7 +59,7 @@ const Feed: React.FC = () => {
       ingredients: [],
       directions: recipe.content.preparationSteps,
       user: false,
-      rating: recipe.content.reviews.averageRating.toFixed(1),
+      rating: recipe.content.reviews.averageRating.toFixed(1) || 0,
     };
     recipe.content.ingredientLines.forEach((ingredient: any) => {
       let newIngredient = {
@@ -132,6 +134,7 @@ const Feed: React.FC = () => {
 
   const searchRecipes = async (e: any) => {
     e.preventDefault();
+    setLoading(true);
     console.log(categories, tags);
     const options = {
       params: { start: "0", maxResult: "20", q: query },
@@ -145,10 +148,12 @@ const Feed: React.FC = () => {
       .then((res: any) => {
         console.log(res.data.feed);
         setResults(res.data.feed);
+        setLoading(false);
       });
   };
   const searchWithId = async (e: any, id: string) => {
     e.preventDefault();
+    setLoading(true);
     setResults([]);
     const options = {
       params: { tag: id, maxResult: "20", start: "0" },
@@ -162,6 +167,7 @@ const Feed: React.FC = () => {
       .then((res: any) => {
         console.log(res.data.feed);
         setResults(res.data.feed);
+        setLoading(false);
       });
   };
 
@@ -174,6 +180,7 @@ const Feed: React.FC = () => {
             <form
               onSubmit={(e) => searchRecipes(e)}
               style={{ display: "flex" }}
+              action=""
             >
               <IonToolbar className={styles.toolbar}>
                 {results.length > 0 ? (
@@ -188,6 +195,7 @@ const Feed: React.FC = () => {
                   onIonChange={(e: any) => setQuery(e.detail.value)}
                   placeholder="Search by food name or ingredient"
                   color="light"
+                  onIonClear={() => setResults([])}
                 />
               </IonToolbar>
             </form>
@@ -233,14 +241,19 @@ const Feed: React.FC = () => {
                       src={categories[`${segment}`][index].image}
                       alt="cover"
                     />
-                    <h1>{categories[`${segment}`][index].name}</h1>
+                    <h3>{categories[`${segment}`][index].name}</h3>
                   </div>
                 );
               }}
             />
           </>
         ) : null}
-        {results.length > 0 ? (
+        {loading && results.length < 0? (
+          <IonRow class={styles.spinner}>
+            <IonSpinner name="lines" />
+          </IonRow>
+        ) : null}
+        {results.length > 0 && !loading ? (
           <Virtuoso
             style={{ height: "95%" }}
             totalCount={results.length}
