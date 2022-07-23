@@ -1,0 +1,51 @@
+.categoryContainer {
+  display: flex;
+  color: white;
+  height: 10rem;
+
+  h1 {
+    display: flex;
+    justify-items: center;
+    justify-content: flex-start;
+    position: absolute;
+    color: white;
+
+    background-color: rgba(0, 0, 0, 0.5);
+    border-bottom-right-radius: 10px;
+    width: 50%;
+    padding: 0.5rem;
+    margin: 0 auto;
+    font-family: Calistoga;
+  }
+  img {
+    object-fit: cover;
+    width: -webkit-fill-available;
+  }
+}
+.swiper {
+  box-shadow: rgb(0 0 0 / 52%) 0px 4px 16px;
+}
+.swiperSlide {
+  height: 11rem;
+}
+.feedGrid {
+  padding-inline-start: unset !important;
+  padding-inline-end: unset !important;
+}
+.itemHeading {
+  --background: transparent !important;
+}
+.toolbar {
+  ion-searchbar {
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+  }
+  ion-buttons {
+    padding-top: 12px !important;
+  }
+}
+.segment {
+  ion-label {
+    font-family: "Calistoga";
+  }
+}

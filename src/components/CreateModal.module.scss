@@ -1,0 +1,43 @@
+.createModal {
+  ion-input {
+    --background: var(--ion-color-light);
+    --padding-start: 1rem !important;
+    border-radius: 50px;
+    border-bottom: 0 !important;
+    margin-bottom: 0.2rem;
+    // box-shadow: rgb(0 0 0 / 52%) 0px 1px 4px;
+  }
+  ion-label {
+    font-size: large !important;
+    font-weight: 600;
+  }
+}
+.ingAmt {
+  padding-right: 0.1rem;
+
+  ion-input {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+  }
+}
+.ingName {
+  padding-left: 0.2rem;
+
+  ion-input {
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+  }
+}
+.form {
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  position: absolute;
+  flex-direction: column;
+  justify-content: space-between;
+  contain: layout size style;
+  overflow: hidden;
+  z-index: 0;
+}
