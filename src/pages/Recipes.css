@@ -1,0 +1,10 @@
+.container {
+  column-count: 2;
+  padding: 3px;
+}
+.create-recipe {
+--border-radius: 1rem;
+margin-top: 0.5rem;
+--box-shadow: rgb(0 77 64 / 30%) 0px 4px 16px;
+font-family: "Calistoga";
+}

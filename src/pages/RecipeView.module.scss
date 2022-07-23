@@ -1,0 +1,141 @@
+.recipeHeader {
+  ion-toolbar {
+    --border-width: 0px !important;
+    --background: transparent;
+    position: absolute;
+    top: 0rem;
+  }
+}
+.headerImage {
+  img {
+    width: 100%;
+    margin-top: -5rem;
+    border-bottom: 5px solid var(--ion-color-main);
+  }
+
+  .headerInfo {
+    position: absolute;
+    top: 10rem;
+    z-index: 10;
+
+    background-color: rgba($color: #000000, $alpha: 0.8);
+    color: white;
+    padding: 1rem;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+
+    h1 {
+      font-size: 1.1rem;
+      padding: 0;
+      margin: 0;
+      font-family: "Calistoga";
+    }
+
+    p {
+      font-size: 0.9rem;
+      padding: 0;
+      margin: 0;
+      color: var(--ion-color-main);
+    }
+  }
+}
+.ingredientHeader {
+  width: 100%;
+
+  ion-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    ion-chip {
+      padding-top: 0%;
+      padding-bottom: 0%;
+      ion-col {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        text-align: center;
+      }
+      ion-col:nth-child(1) {
+        // flex-direction: column;
+        padding-left: 0;
+        border-right: #fff 1px solid;
+      }
+      ion-col:nth-child(2) {
+        padding-right: 0;
+
+        ion-icon {
+          font-size: 2rem;
+        }
+      }
+      small {
+        font-size: 65%;
+      }
+    }
+  }
+}
+.itemLabel {
+  h3 {
+    display: flex;
+    ion-badge {
+      margin-left: 1rem;
+    }
+  }
+}
+.listHeader {
+  font-family: "Calistoga";
+}
+.bookmark {
+  position: absolute;
+  left: 18.5rem;
+  bottom: 0;
+
+  ion-button {
+    height: 100%;
+    ion-icon{
+      color: maroon;
+      font-size: 55px !important;
+      --ionicon-stroke-width: 16px;
+    }
+  }
+}
+.customBackBtn {
+    border-radius: 500px;
+    padding: 0rem;
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 2px solid white;
+    display: flex;
+    flex-direction: row;
+    align-content: center;
+    align-items: center;
+    justify-content: center;
+  
+    ion-icon {
+      color: rgb(255, 255, 255);
+      height: 1.75rem;
+      width: 1.75rem;
+    }
+  }
+  
+  .customFavoriteBtn {
+  
+    position: absolute;
+    top: 3rem;
+    right: 1.4rem;
+    border-radius: 500px;
+    padding: 0.5rem;
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 2px solid white;
+    display: flex;
+    flex-direction: row;
+    align-content: center;
+    align-items: center;
+    justify-content: center;
+  
+    svg {
+  
+      color: rgb(255, 255, 255);
+      height: 1.75rem;
+      width: 1.75rem;
+    }
+  }

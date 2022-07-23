@@ -1,0 +1,25 @@
+.empty-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  align-items: center;
+}
+
+.empty-container strong {
+  font-size: 20px;
+  line-height: 26px;
+  margin-bottom: 1rem;
+}
+
+.empty-container p {
+  font-size: 16px;
+  line-height: 22px;
+  color: #8c8c8c;
+  margin: 0;
+}
+
+.empty-container a {
+  text-decoration: none;
+}
