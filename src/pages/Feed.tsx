@@ -227,7 +227,7 @@ const Feed: React.FC = () => {
               </IonCol>
             </IonRow>
             <Virtuoso
-              style={{ height: "95%" }}
+              style={{ height: "100%" }}
               totalCount={categories[`${segment}`].length}
               itemContent={(index: number) => {
                 return (
@@ -255,7 +255,7 @@ const Feed: React.FC = () => {
         ) : null}
         {results.length > 0 && !loading ? (
           <Virtuoso
-            style={{ height: "95%" }}
+            style={{ height: "100%" }}
             totalCount={results.length}
             itemContent={(index: number) => {
               return (
