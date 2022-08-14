@@ -8,23 +8,12 @@ import {
   useIonModal,
   useIonToast,
 } from "@ionic/react";
-import {
-  globeOutline,
-  starOutline,
-  star,
-  eyeOutline,
-} from "ionicons/icons";
-import { getRecipes } from "../store/Selectors";
-import { addToFavorites } from "../store/RecipeStore";
-import {
-  addRecipeIngredientsShopping,
-  addShoppingCategory,
-} from "../store/ShoppingStore";
-import { useEffect, useState } from "react";
-import { RecipeStore } from "../store";
-import styles from "./SmallRecipeCard.module.scss";
+import { globeOutline, starOutline, star, eyeOutline } from "ionicons/icons";
 import RecipeView from "../pages/RecipeView";
 import { BookmarkBorderIcon, BookmarkIcon, PlaylistAddIcon } from "./icons";
+import { useData } from "../data/DataContext";
+
+import styles from "./SmallRecipeCard.module.scss";
 
 interface ContainerProps {
   recipe: any;
@@ -32,14 +21,16 @@ interface ContainerProps {
 }
 
 const SmallRecipeCard: React.FC<ContainerProps> = ({ recipe, index }) => {
-  const recipes = RecipeStore.useState(getRecipes);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const { addToFavorites } = useData().recipes;
+  const { addRecipeIngredientsShopping } = useData().shopping;
+  const recipes = useData().recipes.getRecipes();
+
   const [presentToast, dismissToast] = useIonToast();
 
   const addRecipe = (recipe: any) => {
     addRecipeIngredientsShopping(recipe.ingredients);
     recipe.ingredients.forEach((ingredient: any) => {
-      addShoppingCategory(ingredient.category);
+      // addShoppingCategory(ingredient.category);
     });
     presentToast({
       buttons: [{ text: "x", handler: dismissToast }],
@@ -66,15 +57,9 @@ const SmallRecipeCard: React.FC<ContainerProps> = ({ recipe, index }) => {
     initialBreakpoint: 1,
     backdropBreakpoint: 1,
   };
-  useEffect(() => {
-    const tempIsFavorite = recipes.find(
-      (faveRecipe: any) => faveRecipe.name === recipe.name
-    );
-
-    setIsFavorite(tempIsFavorite);
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recipes]);
+  const tempIsFavorite = recipes.find(
+    (faveRecipe: any) => faveRecipe.data().name === recipe.name
+  );
 
   return (
     <IonCard key={index} className={styles.smallRecipeCard}>
@@ -100,7 +85,7 @@ const SmallRecipeCard: React.FC<ContainerProps> = ({ recipe, index }) => {
             >
               <IonIcon
                 style={{ fill: "maroon" }}
-                src={isFavorite ? BookmarkIcon : BookmarkBorderIcon}
+                src={tempIsFavorite ? BookmarkIcon : BookmarkBorderIcon}
               />
             </IonButton>
 

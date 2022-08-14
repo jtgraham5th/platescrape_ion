@@ -26,7 +26,35 @@
   ion-input {
     border-top-left-radius: 0 !important;
     border-bottom-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
   }
+}
+.ingCategory {
+  padding-left: 0;
+  ion-item {
+    --padding-start: 0px;
+    --padding-end: 0px;
+    --inner-padding-end: 0px;
+    font-size: small;
+    // border-top-right-radius: 1rem;
+    // border-bottom-right-radius: 1rem;
+    ion-select {
+      padding-right: 0.5rem;
+      padding-left: 0.5rem;
+      background: var(--ion-color-light);
+      margin-top: -0.5rem;
+      border-top-right-radius: 1rem;
+      border-bottom-right-radius: 1rem;
+      width: 100%;
+    }
+  }
+}
+
+.recipeDirections {
+  padding: 0.5rem;
+  border: 1px solid silver;
+  border-radius: 1rem;
 }
 .form {
   left: 0;

@@ -2,5 +2,8 @@
   font-family: "Calistoga" !important;
 }
 ion-fab {
-  bottom: 30px !important
+  bottom: 5rem !important
+}
+.slider:not(:nth-child(1)) {
+  border-top: 2px solid var(--ion-background-color);
 }

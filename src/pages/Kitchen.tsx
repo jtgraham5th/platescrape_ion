@@ -1,3 +1,4 @@
+// import { useEffect, useState } from "react";
 import {
   IonContent,
   IonFab,
@@ -17,38 +18,26 @@ import {
   useIonToast,
 } from "@ionic/react";
 import { trashBin, addCircleOutline, addOutline } from "ionicons/icons";
-import { KitchenStore } from "../store";
-import {
-  addKitchenItem,
-  removeKitchenItem,
-  addKitchenCategory,
-} from "../store/KitchenStore";
-import { addShoppingItem, addShoppingCategory } from "../store/ShoppingStore";
-import { getKitchenItems, getCategories } from "../store/Selectors";
-import "./Kitchen.css";
-import { useEffect, useState } from "react";
 import CreateItemModal from "../components/CreateItemModal";
 import EmptyContainer from "../components/EmptyContainer";
 import BrandHeader from "../components/BrandHeader";
+import { useData } from "../data/DataContext";
+
+import "./Kitchen.css";
 
 const Kitchen: React.FC = () => {
-  const fridge = KitchenStore.useState(getKitchenItems);
-  const categories = KitchenStore.useState(getCategories);
-  const [fridgeList, setFridgeList] = useState([]);
+  const { kitchen_state, kitchen_loading, addKitchenItem, removeKitchenItem, getKitchenCategories} = useData().kitchen;
+  const fridgeList = !kitchen_loading ? kitchen_state.docs : [];
+  const { addShoppingItem } = useData().shopping;
+  const categories = getKitchenCategories();
   const [presentToast, dismissToast] = useIonToast();
 
-  useEffect(() => {
-    console.log(fridge);
-    setFridgeList(fridge);
-  }, [fridge]);
-
-  const addToShoppingList = (index: number) => {
-    addShoppingItem(fridge[index]);
-    addShoppingCategory(fridge[index].category);
-    removeKitchenItem(index);
+  const addToShoppingList = (item: any) => {
+    addShoppingItem(item);
+    removeKitchenItem(item);
     presentToast({
       buttons: [{ text: "x", handler: dismissToast }],
-      message: `${fridge[index].name} has been added to your Shopping List`,
+      message: `${item.name} has been added to your Shopping List`,
       duration: 3000,
     });
   };
@@ -56,7 +45,6 @@ const Kitchen: React.FC = () => {
     dismiss: () => dismiss(),
     listName: "Kitchen",
     addToList: addKitchenItem,
-    addCategory: addKitchenCategory,
   });
 
   const modalOptions = {
@@ -72,7 +60,7 @@ const Kitchen: React.FC = () => {
         <BrandHeader />
       </IonHeader>
       <IonContent fullscreen>
-        {fridgeList.length > 0 ? (
+        {!kitchen_loading && fridgeList.length > 0 ? (
           <IonList>
             {categories.map((category: any, i: number) => {
               return (
@@ -81,7 +69,8 @@ const Kitchen: React.FC = () => {
                     <IonLabel className="category-label">{category}</IonLabel>
                   </IonItemDivider>
 
-                  {fridgeList.map((ingredient: any, index: number) => {
+                  {fridgeList.map((item: any, index: number) => {
+                    const ingredient = item.data();
                     return ingredient.category === category ? (
                       <IonItemSliding key={index}>
                         <IonItem lines="none" detail={false}>
@@ -96,24 +85,24 @@ const Kitchen: React.FC = () => {
                         </IonItem>
                         <IonItemOptions side="start">
                           <IonItemOption
-                            color="main"
+                            color="success"
                             style={{
                               paddingLeft: "1rem",
                               paddingRight: "1rem",
                             }}
-                            onClick={() => addToShoppingList(index)}
+                            onClick={() => addToShoppingList(ingredient)}
                           >
                             <IonIcon icon={addCircleOutline} />
                           </IonItemOption>
                         </IonItemOptions>
                         <IonItemOptions side="end">
                           <IonItemOption
-                            color="main"
+                            color="danger"
                             style={{
                               paddingLeft: "1rem",
                               paddingRight: "1rem",
                             }}
-                            onClick={() => removeKitchenItem(index)}
+                            onClick={() => removeKitchenItem(ingredient)}
                           >
                             <IonIcon icon={trashBin} />
                           </IonItemOption>

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   IonCard,
   IonButton,
@@ -15,17 +16,11 @@ import {
   starHalf,
   eyeOutline,
 } from "ionicons/icons";
-import { getRecipes } from "../store/Selectors";
-import { addToFavorites } from "../store/RecipeStore";
-import {
-  addRecipeIngredientsShopping,
-  addShoppingCategory,
-} from "../store/ShoppingStore";
-import { useEffect, useState } from "react";
-import { RecipeStore } from "../store";
-import styles from "./RecipeCard.module.scss";
 import RecipeView from "../pages/RecipeView";
 import { BookmarkBorderIcon, BookmarkIcon, PlaylistAddIcon } from "./icons";
+import { useData } from "../data/DataContext";
+
+import styles from "./RecipeCard.module.scss";
 
 interface ContainerProps {
   recipe: any;
@@ -33,14 +28,16 @@ interface ContainerProps {
 }
 
 const RecipeCard: React.FC<ContainerProps> = ({ recipe, index }) => {
-  const recipes = RecipeStore.useState(getRecipes);
+  const { addToFavorites } = useData().recipes;
+  const { addRecipeIngredientsShopping } = useData().shopping;
+  const recipes = useData().recipes.getRecipes();
+
   const [isFavorite, setIsFavorite] = useState(false);
   const [presentToast, dismissToast] = useIonToast();
 
   const addRecipe = (recipe: any) => {
     addRecipeIngredientsShopping(recipe.ingredients);
     recipe.ingredients.forEach((ingredient: any) => {
-      addShoppingCategory(ingredient.category);
     });
     presentToast({
       buttons: [{ text: "x", handler: dismissToast }],
@@ -69,7 +66,7 @@ const RecipeCard: React.FC<ContainerProps> = ({ recipe, index }) => {
   };
   useEffect(() => {
     const tempIsFavorite = recipes.find(
-      (faveRecipe: any) => faveRecipe.name === recipe.name
+      (faveRecipe: any) => faveRecipe.data().name === recipe.name
     );
 
     setIsFavorite(tempIsFavorite);

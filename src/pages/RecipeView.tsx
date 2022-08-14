@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import {
   IonCardTitle,
   IonCardSubtitle,
@@ -34,27 +35,6 @@ import {
   add,
   caretBack,
 } from "ionicons/icons";
-import { addToFavorites } from "../store/RecipeStore";
-import {
-  addRecipeIngredientsShopping,
-  addShoppingCategory,
-  addShoppingItem,
-  removeShoppingItem,
-} from "../store/ShoppingStore";
-import { useEffect, useRef, useState } from "react";
-import { KitchenStore, RecipeStore } from "../store";
-import styles from "./RecipeView.module.scss";
-import {
-  getKitchenItems,
-  getRecipes,
-  getShoppingList,
-} from "../store/Selectors";
-import { ShoppingStore } from "../store";
-import {
-  addKitchenItem,
-  addKitchenCategory,
-  addRecipeIngredientsKitchen,
-} from "../store/KitchenStore";
 import {
   BookmarkBorderIcon,
   BookmarkIcon,
@@ -62,17 +42,23 @@ import {
   ShoppingCartIcon,
 } from "../components/icons";
 import EmptyContainer from "../components/EmptyContainer";
+import { useData } from "../data/DataContext";
+
+import styles from "./RecipeView.module.scss";
 
 interface ContainerProps {
   recipe: any;
   close: any;
 }
 const RecipeView: React.FC<ContainerProps> = ({ recipe, close }) => {
+  const { addToFavorites } = useData().recipes;
+  const { addRecipeIngredientsShopping, addShoppingItem, removeShoppingItem } = useData().shopping;
+  const { addRecipeIngredientsKitchen, addKitchenItem } = useData().kitchen;
   const pageRef = useRef();
   const [isFavorite, setIsFavorite] = useState(false);
-  const recipes = RecipeStore.useState(getRecipes);
-  const shoppingList = ShoppingStore.useState(getShoppingList);
-  const fridge = KitchenStore.useState(getKitchenItems);
+  const recipes = useData().recipes.getRecipes();
+  const shoppingList = useData().shopping.shoppingList_state.docs;
+  const fridge = useData().kitchen.kitchen_state.docs;
   const [segment, setSegment] = useState("ingredients");
   const [presentToast, dismissToast] = useIonToast();
 
@@ -81,13 +67,13 @@ const RecipeView: React.FC<ContainerProps> = ({ recipe, close }) => {
   };
 
   const checkShoppingCart = (ingredient: any) => {
-    if (shoppingList.find((item: any) => item.name === ingredient)) {
+    if (shoppingList.find((item: any) => item.data().name === ingredient)) {
       return true;
     }
     return false;
   };
   const checkFridge = (ingredient: any) => {
-    if (fridge.find((item: any) => item.name === ingredient)) {
+    if (fridge.find((item: any) => item.data().name === ingredient)) {
       return true;
     }
     return false;
@@ -113,7 +99,6 @@ const RecipeView: React.FC<ContainerProps> = ({ recipe, close }) => {
 
   const addToShoppingList = (ingredient: any) => {
     addShoppingItem(ingredient);
-    addShoppingCategory(ingredient.category);
     presentToast({
       buttons: [{ text: "x", handler: dismissToast }],
       message: `${ingredient.name}' has been added to your Shopping List`,
@@ -123,10 +108,8 @@ const RecipeView: React.FC<ContainerProps> = ({ recipe, close }) => {
   const addToKitchen = (ingredient: any) => {
     if (ingredient.name) {
       addKitchenItem(ingredient);
-      addKitchenCategory(ingredient.category);
     } else {
       addKitchenItem(ingredient);
-      addKitchenCategory(ingredient.category);
     }
     presentToast({
       buttons: [{ text: "x", handler: dismissToast }],
@@ -137,7 +120,6 @@ const RecipeView: React.FC<ContainerProps> = ({ recipe, close }) => {
   const addAllToShoppingList = () => {
     addRecipeIngredientsShopping(recipe.ingredients);
     recipe.ingredients.forEach((ingredient: any) => {
-      addShoppingCategory(ingredient.category);
     });
     presentToast({
       buttons: [{ text: "x", handler: dismissToast }],
@@ -148,7 +130,6 @@ const RecipeView: React.FC<ContainerProps> = ({ recipe, close }) => {
   const addAllToKitchen = () => {
     addRecipeIngredientsKitchen(recipe.content.ingredientLines);
     recipe.ingredients.forEach((ingredient: any) => {
-      addKitchenCategory(ingredient.category);
     });
     presentToast({
       buttons: [{ text: "x", handler: dismissToast }],
@@ -158,19 +139,7 @@ const RecipeView: React.FC<ContainerProps> = ({ recipe, close }) => {
   };
 
   const removeFromShoppingList = (ingredient: any) => {
-    let index;
-    if (ingredient.name) {
-      index = shoppingList.findIndex(
-        (item: any) => item.name === ingredient.name
-      );
-      console.log(index);
-    } else {
-      index = shoppingList.findIndex(
-        (item: any) => item.name === ingredient.name
-      );
-      console.log(index);
-    }
-    removeShoppingItem(index);
+    removeShoppingItem(ingredient);
     presentToast({
       buttons: [{ text: "x", handler: dismissToast }],
       message: `'${ingredient.name}' has been removed from your Shopping List`,
@@ -189,9 +158,8 @@ const RecipeView: React.FC<ContainerProps> = ({ recipe, close }) => {
   };
 
   useEffect(() => {
-    console.log(recipe);
     const tempIsFavorite = recipes.find(
-      (faveRecipe: any) => faveRecipe.name === recipe.name
+      (faveRecipe: any) => faveRecipe.data().name === recipe.name
     );
 
     setIsFavorite(tempIsFavorite);
@@ -204,39 +172,36 @@ const RecipeView: React.FC<ContainerProps> = ({ recipe, close }) => {
       <IonContent fullscreen>
         <div className={styles.headerImage}>
           <img src={recipe.image} alt="main cover" />
-          <div className={styles.recipeHeader}>
-            <IonToolbar>
-              <IonButtons slot="start">
-                <IonButton
-                  className={styles.customBackBtn}
-                  fill="clear"
-                  size="large"
-                  color="main"
-                  onClick={close}
-                >
-                  <IonIcon size="large" icon={caretBack} />
-                </IonButton>
-              </IonButtons>
+          <IonToolbar className={styles.recipeHeader}>
+            <IonButtons slot="start">
+              <IonButton
+                className={styles.customBackBtn}
+                fill="clear"
+                size="large"
+                color="main"
+                onClick={close}
+              >
+                <IonIcon size="large" icon={caretBack} />
+              </IonButton>
+            </IonButtons>
 
-              <IonButtons slot="end" className={styles.bookmark}>
-                <IonButton
-                  fill="clear"
-                  size="large"
-                  onClick={() => addFavorite(recipe)}
-                >
-                  <IonIcon
-                    icon={isFavorite ? BookmarkIcon : BookmarkBorderIcon}
-                  />
-                </IonButton>
-              </IonButtons>
-            </IonToolbar>
-          </div>
-
-          <div
-            className={`${styles.headerInfo} animate__animated animate__slideInLeft`}
-          >
-            <h1>{recipe.name}</h1>
-          </div>
+            <IonButtons slot="end" className={styles.bookmark}>
+              <IonButton
+                fill="clear"
+                size="large"
+                onClick={() => addFavorite(recipe)}
+              >
+                <IonIcon
+                  icon={isFavorite ? BookmarkIcon : BookmarkBorderIcon}
+                />
+              </IonButton>
+            </IonButtons>
+          </IonToolbar>
+        </div>
+        <div
+          className={`${styles.headerInfo} animate__animated animate__slideInLeft`}
+        >
+          <h1>{recipe.name}</h1>
         </div>
 
         <IonGrid>
@@ -367,7 +332,7 @@ const RecipeView: React.FC<ContainerProps> = ({ recipe, close }) => {
                     </IonItem>
                     <IonItemOptions side="end">
                       <IonItemOption
-                        color="main"
+                        color="success"
                         style={{
                           paddingLeft: "1rem",
                           paddingRight: "1rem",

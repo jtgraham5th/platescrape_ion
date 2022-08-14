@@ -1,10 +1,8 @@
 .recipeHeader {
-  ion-toolbar {
     --border-width: 0px !important;
     --background: transparent;
     position: absolute;
     top: 0rem;
-  }
 }
 .headerImage {
   img {
@@ -12,6 +10,7 @@
     margin-top: -5rem;
     border-bottom: 5px solid var(--ion-color-main);
   }
+}
 
   .headerInfo {
     position: absolute;
@@ -38,7 +37,7 @@
       color: var(--ion-color-main);
     }
   }
-}
+
 .ingredientHeader {
   width: 100%;
 

@@ -16,7 +16,7 @@ import {
 } from "@ionic/react";
 import axios from "axios";
 import { caretBack } from "ionicons/icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Virtuoso } from "react-virtuoso";
 import "swiper/css";
 import "swiper/css/free-mode";
@@ -25,16 +25,30 @@ import { getTags, getCategories } from "../store/Selectors";
 import RecipeCard from "../components/RecipeCard";
 import styles from "./Feed.module.scss";
 import BrandHeader from "../components/BrandHeader";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { useAuth } from "../data/AuthContext";
+import { useHistory } from "react-router";
 
 const Feed: React.FC = () => {
   const [query, setQuery] = useState(null);
   const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
-  // const [tags, setTags] = useState<any>({});
-  // const [categories, setCategories] = useState<any>({});
+  const [load, setLoad] = useState(false);
   const categories = FeedStore.useState(getCategories);
   const tags = FeedStore.useState(getTags);
   const [segment, setSegment] = useState("cuisines");
+
+  const history = useHistory();
+  const { auth } = useAuth();
+  const [user, loading] = useAuthState(auth);
+
+  useEffect(() => {
+    if (loading) {
+      // maybe trigger a loading screen
+      return;
+    }
+    if (user?.uid) history.push("/feed");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, loading, ]);
 
   const toggleSegment = (value: any) => {
     setSegment(value);
@@ -50,6 +64,7 @@ const Feed: React.FC = () => {
       ingredients: Array<any>;
       directions: Array<any>;
       user: boolean;
+      category: object;
       rating: number;
     } = {
       name: recipe.display.displayName,
@@ -59,7 +74,10 @@ const Feed: React.FC = () => {
       ingredients: [],
       directions: recipe.content.preparationSteps,
       user: false,
-      rating: recipe.content.reviews.averageRating.toFixed(1) || 0,
+      category: recipe.content.tags,
+      rating: recipe.content.reviews.averageRating
+        ? recipe.content.reviews.averageRating.toFixed(1)
+        : 0,
     };
     recipe.content.ingredientLines.forEach((ingredient: any) => {
       let newIngredient = {
@@ -134,7 +152,7 @@ const Feed: React.FC = () => {
 
   const searchRecipes = async (e: any) => {
     e.preventDefault();
-    setLoading(true);
+    setLoad(true);
     console.log(categories, tags);
     const options = {
       params: { start: "0", maxResult: "20", q: query },
@@ -148,12 +166,12 @@ const Feed: React.FC = () => {
       .then((res: any) => {
         console.log(res.data.feed);
         setResults(res.data.feed);
-        setLoading(false);
+        setLoad(false);
       });
   };
   const searchWithId = async (e: any, id: string) => {
     e.preventDefault();
-    setLoading(true);
+    setLoad(true);
     setResults([]);
     const options = {
       params: { tag: id, maxResult: "20", start: "0" },
@@ -167,7 +185,7 @@ const Feed: React.FC = () => {
       .then((res: any) => {
         console.log(res.data.feed);
         setResults(res.data.feed);
-        setLoading(false);
+        setLoad(false);
       });
   };
 
@@ -196,6 +214,7 @@ const Feed: React.FC = () => {
                   placeholder="Search by food name or ingredient"
                   color="light"
                   onIonClear={() => setResults([])}
+                  inputMode="search"
                 />
               </IonToolbar>
             </form>
@@ -248,12 +267,12 @@ const Feed: React.FC = () => {
             />
           </>
         ) : null}
-        {loading && results.length < 0? (
+        {load && results.length < 0 ? (
           <IonRow class={styles.spinner}>
             <IonSpinner name="lines" />
           </IonRow>
         ) : null}
-        {results.length > 0 && !loading ? (
+        {results.length > 0 && !load ? (
           <Virtuoso
             style={{ height: "100%" }}
             totalCount={results.length}
