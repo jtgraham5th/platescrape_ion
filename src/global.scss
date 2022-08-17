@@ -1,12 +1,22 @@
 @font-face {
-    font-family: "Calistoga";
-    src: url("../public/assets/fonts/Calistoga-Regular.ttf");
-  }
-  @font-face {
-    font-family: "Katibeh";
-    src: url("../public/assets/fonts/Katibeh-Regular.ttf");
-  }
-  @font-face {
-    font-family: "Oleo";
-    src: url("../public/assets/fonts/OleoScript-Regular.ttf");
-  }
+  font-family: "Calistoga";
+  src: url("../public/assets/fonts/Calistoga-Regular.ttf");
+}
+@font-face {
+  font-family: "Katibeh";
+  src: url("../public/assets/fonts/Katibeh-Regular.ttf");
+}
+@font-face {
+  font-family: "Oleo";
+  src: url("../public/assets/fonts/OleoScript-Regular.ttf");
+}
+ion-popover {
+  --width: 1 !important;
+}
+ion-select-popover > ion-list > ion-item {
+  font-size: 1rem;
+}
+ion-select-popover > ion-list > ion-item > ion-checkbox {
+  --size: 0.8rem;
+  margin-right: 0.5rem !important;
+}

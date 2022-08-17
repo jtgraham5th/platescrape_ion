@@ -1,7 +1,9 @@
 import {
+  AccordionGroupCustomEvent,
   IonAccordion,
   IonAccordionGroup,
   IonButton,
+  IonCheckbox,
   IonContent,
   IonHeader,
   IonIcon,
@@ -21,7 +23,7 @@ import { useData } from "../data/DataContext";
 
 import "./Recipes.css";
 import { filterOutline } from "ionicons/icons";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const Recipes: React.FC = () => {
   const {
@@ -37,6 +39,7 @@ const Recipes: React.FC = () => {
   const accordionGroup = useRef<null | HTMLIonAccordionGroupElement>(null);
   const categories = !recipes_categories_loading ? getRecipesCategories() : [];
   const [category, setCategory] = useState();
+  const [userCreated, setUserCreated] = useState();
   const [results, setResults] = useState(recipes);
 
   const toggleFilter = () => {
@@ -53,7 +56,7 @@ const Recipes: React.FC = () => {
   };
   const searchWithFilter = (selectedCategory: any) => {
     if (category) {
-      const newResults = recipes.filter((e: any) => {
+      const newResults = results.filter((e: any) => {
         if (e.data().category[category]) {
           return e
             .data()
@@ -76,6 +79,22 @@ const Recipes: React.FC = () => {
     backdropBreakpoint: 1,
   };
 
+  useEffect(() => {
+    if (userCreated) {
+      const newResults = results.filter((e: any) => e.data().user === true);
+      setResults(newResults);
+    } else {
+      setResults(recipes);
+    }
+    // eslint-disable-next-line
+  }, [userCreated]);
+
+  const accordionGroupChange = (ev: AccordionGroupCustomEvent) => {
+    const selectedValue = ev.detail.value;
+    console.log(selectedValue)
+      if (selectedValue === undefined ||selectedValue === "second") { 
+        setResults(recipes) }
+  };
   return (
     <IonPage>
       <IonHeader>
@@ -83,27 +102,28 @@ const Recipes: React.FC = () => {
       </IonHeader>
 
       <IonContent fullscreen>
-        <IonAccordionGroup ref={accordionGroup}>
+        <IonAccordionGroup ref={accordionGroup} onIonChange={accordionGroupChange}>
           <IonAccordion value="first">
             <IonItem slot="header" color="light">
               <IonIcon icon={filterOutline} />
               <IonLabel>Filter</IonLabel>
             </IonItem>
             <IonSegment scrollable value="heart" slot="content">
-              {categories && Object.keys(categories).map((value: any, index: any) => {
-                return (
-                  <IonSegmentButton
-                    key={index}
-                    value={value}
-                    onClick={(e: any) => {
-                      setCategory(e.target.value);
-                      toggleFilter();
-                    }}
-                  >
-                    {value}
-                  </IonSegmentButton>
-                );
-              })}
+              {categories &&
+                Object.keys(categories).map((value: any, index: any) => {
+                  return (
+                    <IonSegmentButton
+                      key={index}
+                      value={value}
+                      onClick={(e: any) => {
+                        setCategory(e.target.value);
+                        toggleFilter();
+                      }}
+                    >
+                      {value}
+                    </IonSegmentButton>
+                  );
+                })}
             </IonSegment>
           </IonAccordion>
           <IonAccordion value="second">
@@ -123,7 +143,13 @@ const Recipes: React.FC = () => {
             </IonSegment>
           </IonAccordion>
         </IonAccordionGroup>
-
+        <IonItem>
+          <IonLabel>Show User Created Recipes</IonLabel>
+          <IonCheckbox
+            checked={userCreated}
+            onIonChange={(e: any) => setUserCreated(e.detail.checked)}
+          />
+        </IonItem>
         <IonButton
           className="create-recipe"
           expand="full"
