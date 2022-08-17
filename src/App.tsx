@@ -47,6 +47,7 @@ import Signup from "./pages/Signup";
 import { AuthProvider } from "./data/AuthContext";
 import { DataProvider } from "./data/DataContext";
 import { PrivateRoute } from "./PrivateRoute";
+import Menu from "./components/Menu";
 
 setupIonicReact();
 
@@ -57,6 +58,7 @@ const App: React.FC = () => {
         <DataProvider>
           <IonApp>
             <IonReactRouter>
+              <Menu />
               <IonSplitPane contentId="main">
                 <IonTabs>
                   <IonRouterOutlet id="main">
@@ -106,7 +108,7 @@ const App: React.FC = () => {
                     </IonTabButton>
                   </IonTabBar>
                 </IonTabs>
-              </IonSplitPane>
+                </IonSplitPane>
             </IonReactRouter>
           </IonApp>
         </DataProvider>

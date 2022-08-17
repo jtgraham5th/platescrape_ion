@@ -47,15 +47,14 @@ const Feed: React.FC = () => {
       return;
     }
     if (user?.uid) history.push("/feed");
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, loading, ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, loading]);
 
   const toggleSegment = (value: any) => {
     setSegment(value);
   };
 
   const convertRecipe = (recipe: any) => {
-    console.log(recipe);
     let newRecipe: {
       name: string;
       servings: number;
@@ -153,7 +152,6 @@ const Feed: React.FC = () => {
   const searchRecipes = async (e: any) => {
     e.preventDefault();
     setLoad(true);
-    console.log(categories, tags);
     const options = {
       params: { start: "0", maxResult: "20", q: query },
       headers: {
@@ -246,7 +244,8 @@ const Feed: React.FC = () => {
               </IonCol>
             </IonRow>
             <Virtuoso
-              style={{ height: "100%" }}
+              style={{ height: "100%", paddingBottom: "3rem" }}
+              className={styles.feedContent}
               totalCount={categories[`${segment}`].length}
               itemContent={(index: number) => {
                 return (
@@ -274,6 +273,7 @@ const Feed: React.FC = () => {
         ) : null}
         {results.length > 0 && !load ? (
           <Virtuoso
+            className={styles.feedContent}
             style={{ height: "100%" }}
             totalCount={results.length}
             itemContent={(index: number) => {

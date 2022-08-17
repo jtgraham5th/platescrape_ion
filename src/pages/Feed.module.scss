@@ -3,7 +3,9 @@
   color: white;
   height: 10rem;
 
-  h1,h2,h3 {
+  h1,
+  h2,
+  h3 {
     display: flex;
     justify-items: center;
     justify-content: flex-start;
@@ -31,6 +33,11 @@
 .feedGrid {
   padding-inline-start: unset !important;
   padding-inline-end: unset !important;
+}
+.feedContent {
+  [data-test-id="virtuoso-item-list"] {
+    padding-bottom: 7.5rem !important;
+  }
 }
 .itemHeading {
   --background: transparent !important;

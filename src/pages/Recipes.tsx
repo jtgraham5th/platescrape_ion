@@ -90,7 +90,7 @@ const Recipes: React.FC = () => {
               <IonLabel>Filter</IonLabel>
             </IonItem>
             <IonSegment scrollable value="heart" slot="content">
-              {Object.keys(categories).map((value: any, index: any) => {
+              {categories && Object.keys(categories).map((value: any, index: any) => {
                 return (
                   <IonSegmentButton
                     key={index}

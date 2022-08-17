@@ -1,20 +1,14 @@
-import {
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   signInWithEmailAndPassword,
   signOut,
   createUserWithEmailAndPassword,
   getAuth,
   Auth,
+  updateProfile,
+  User,
 } from "firebase/auth";
-import {
-  getFirestore,
-  setDoc,
-  doc,
-} from "firebase/firestore";
+import { getFirestore, setDoc, doc } from "firebase/firestore";
 
 import { useFirebaseApp } from "./FirebaseContext";
 import React from "react";
@@ -38,7 +32,7 @@ export function AuthProvider(props: React.PropsWithChildren<any>) {
   const auth = getAuth(useFirebaseApp());
   const db = getFirestore(useFirebaseApp());
 
-  const [currentUser, setCurrentUser] = useState();
+  const [currentUser, setCurrentUser] = useState<User>();
   const [loading, setLoading] = useState(true);
 
   const login = (email: string, password: string) => {
@@ -52,7 +46,9 @@ export function AuthProvider(props: React.PropsWithChildren<any>) {
   const signUp = async (name: string, email: string, password: string) => {
     try {
       const res = await createUserWithEmailAndPassword(auth, email, password);
+
       const user = res.user;
+      await updateProfile(user, { displayName: name });
       return await setDoc(doc(db, "users", user.uid), {
         name,
         authProvider: "local",
@@ -79,7 +75,7 @@ export function AuthProvider(props: React.PropsWithChildren<any>) {
   // };
 
   useEffect(() => {
-    console.log("CHECKING---FOR----USER----AUTHENTICAITON")
+    console.log("CHECKING---FOR----USER----AUTHENTICAITON");
     const unsubscribe = auth.onAuthStateChanged((user: any) => {
       setCurrentUser(user);
       setLoading(false);

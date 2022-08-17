@@ -424,8 +424,8 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
     }
   };
   const removeKitchenItem = async (item: any) => {
-    try {
-      await deleteDoc(doc(db, `users/${currentUID}/kitchen`, item));
+     try {
+     await deleteDoc(doc(db, `users/${currentUID}/kitchen`, item.name));
     } catch (err: any) {
       console.error(err);
       alert(err.message);
