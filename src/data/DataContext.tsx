@@ -72,6 +72,9 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
   const [allRecipeCategories] = useDocument(doc(db, `categories/recipes`), {
     snapshotListenOptions: { includeMetadataChanges: true },
   });
+  const [allIngredientCategories] = useDocument(doc(db, `categories/ingredients`), {
+    snapshotListenOptions: { includeMetadataChanges: true },
+  });
   useEffect(() => {
     shoppingList_state?.docs.forEach(async (ingredient: any) => {
       const item = ingredient.data();
@@ -80,6 +83,10 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
           activeCategories: arrayUnion(item.category),
           allCategories: arrayUnion(item.category),
         });
+        await updateDoc(doc(db, `categories/ingredients`), {
+          [`${item.category}`]: arrayUnion(item.name),
+        });
+
       } catch (err: any) {
         await setDoc(doc(db, `users/${currentUID}/categories/shopping`), {
           activeCategories: arrayUnion(item.category),
@@ -111,6 +118,10 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
           activeCategories: arrayUnion(item.category),
           allCategories: arrayUnion(item.category),
         });
+        await updateDoc(doc(db, `categories/ingredients`), {
+          [`${item.category}`]: arrayUnion(item.name),
+        });
+
       } catch (err: any) {
         console.error(err);
         await setDoc(doc(db, `users/${currentUID}/categories/kitchen`), {
@@ -134,7 +145,17 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kitchen_state]);
-
+  // const shoppingCategories = async () => {
+  //   console.log(shoppingList_categories_state?.data());
+  //   kitchen_categories_state?.data()?.activeCategories.forEach(
+  //     async (categoryName: any) => {
+  //       console.log(categoryName);
+  //       await updateDoc(doc(db, `categories/ingredients`), {
+  //         [`${categoryName}`]: [],
+  //       });
+  //     }
+  //   );
+  // };
   useEffect(() => {
     recipes_state?.docs.forEach(async (item: any) => {
       const recipe = item.data();
@@ -390,6 +411,9 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
       return shoppingList_categories_state?.data()?.allCategories;
     }
   };
+  const getAllIngredientCategories = () => {
+    return allIngredientCategories?.data()
+  };
 
   ///// KITCHEN FUNCTIONS ///////
   const addRecipeIngredientsKitchen = (ingredientList: any) => {
@@ -486,6 +510,7 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
     shoppingList_loading,
     getShoppingListCategories,
     getAllShoppingListCategories,
+    getAllIngredientCategories,
     addRecipeIngredientsShopping,
     addShoppingItem,
     removeShoppingItem,
