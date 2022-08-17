@@ -16,13 +16,12 @@ import {
   IonSelect,
   IonTextarea,
   IonIcon,
+  IonAccordion,
+  IonAccordionGroup,
 } from "@ionic/react";
-import {
-  arrowForwardOutline,
-  arrowBackOutline,
-} from "ionicons/icons";
-import { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { arrowForwardOutline, arrowBackOutline } from "ionicons/icons";
+import { useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 import { useData } from "../data/DataContext";
 
 import styles from "./CreateModal.module.scss";
@@ -30,15 +29,27 @@ import styles from "./CreateModal.module.scss";
 const CreateRecipeModal: React.FC<{
   dismiss: any;
 }> = ({ dismiss }) => {
-  const { addToFavorites } = useData().recipes;
+  // const { addToFavorites } = useData().recipes;
   const [ingAmount, setIngAmount] = useState(5);
   const [dirAmount, setDirAmount] = useState(5);
   const [toggleDirections, setToggleDirections] = useState(false);
   const [presentToast] = useIonToast();
-  const { control, register, handleSubmit } = useForm();
+  const { register, handleSubmit } = useForm();
   const ingredientCategories =
     useData().shopping.getAllShoppingListCategories();
+  useData().shopping.getAllShoppingListCategories();
+  const recipeCategories = useData().recipes.getAllRecipesCategories();
+  const accordionGroup = useRef<null | HTMLIonAccordionGroupElement>(null);
 
+  console.log(recipeCategories);
+  interface newRecipeCategories {
+    [key: string]: Array<string>;
+    course: Array<string>;
+    cuisine: Array<string>;
+    dish: Array<string>;
+    technique: Array<string>;
+    nutrition: Array<string>;
+  }
   const onSubmit = (recipe: any) => {
     console.log(recipe);
     let newRecipe: {
@@ -46,7 +57,7 @@ const CreateRecipeModal: React.FC<{
       servings: number;
       time: string;
       image: string;
-      category: Object;
+      category: newRecipeCategories;
       ingredients: Array<any>;
       directions: Array<any>;
       user: boolean;
@@ -96,8 +107,12 @@ const CreateRecipeModal: React.FC<{
         newRecipe.directions.push(recipe[`directions${i}`]);
       }
     }
+    Object.keys(newRecipe.category).forEach((categoryName: any) => {
+      console.log(categoryName, recipe[`rc-${categoryName}`]);
+      newRecipe.category[categoryName].push(recipe[`rc-${categoryName}`]);
+    });
     console.log(newRecipe);
-    addToFavorites(newRecipe);
+    // addToFavorites(newRecipe);
     presentToast(`${newRecipe.name} has been added to your Recipes`, 3000);
     dismiss();
   };
@@ -135,27 +150,127 @@ const CreateRecipeModal: React.FC<{
                 <IonList>
                   <IonItem>
                     <IonLabel position="stacked">Serving Size</IonLabel>
-                    <Controller
-                      control={control}
-                      render={({ field }) => (
-                        <IonSelect
-                          interface="popover"
-                          value={field.value}
-                          placeholder="Select Serving Size"
-                        >
-                          {Array.apply(null, Array(20)).map((e, i) => (
-                            <IonSelectOption key={i} value={i + 1}>
-                              {i + 1}
-                            </IonSelectOption>
-                          ))}
-                        </IonSelect>
-                      )}
-                      name="servingSize"
-                    />
+                    <IonSelect
+                      interface="popover"
+                      placeholder="Select Serving Size"
+                      {...register("servingSize")}
+                    >
+                      {Array.apply(null, Array(20)).map((e, i) => (
+                        <IonSelectOption key={i} value={i + 1}>
+                          {i + 1}
+                        </IonSelectOption>
+                      ))}
+                    </IonSelect>
                   </IonItem>
                 </IonList>
               </IonCol>
-
+              <IonAccordionGroup ref={accordionGroup}>
+                <IonAccordion value="first">
+                  <IonItem slot="header">
+                    <IonLabel>Add Categories</IonLabel>
+                  </IonItem>
+                  <IonRow
+                    className="search-container animate__animated animate__fadeIn"
+                    slot="content"
+                  >
+                    <IonCol size="4">
+                      <IonItem>
+                        <IonLabel position="stacked">Course</IonLabel>
+                        <IonSelect
+                          interface="popover"
+                          placeholder="category"
+                          multiple={true}
+                          {...register("rc-course")}
+                        >
+                          {recipeCategories.course.map(
+                            (category: any, i: number) => (
+                              <IonSelectOption key={i} value={category}>
+                                {category["display-name"]}
+                              </IonSelectOption>
+                            )
+                          )}
+                        </IonSelect>
+                      </IonItem>
+                    </IonCol>
+                    <IonCol size="4">
+                      <IonItem>
+                        <IonLabel position="stacked">Cuisine</IonLabel>
+                        <IonSelect
+                          interface="popover"
+                          placeholder="category"
+                          multiple={true}
+                          {...register("rc-cuisine")}
+                        >
+                          {recipeCategories.cuisine.map(
+                            (category: any, i: number) => (
+                              <IonSelectOption key={i} value={category}>
+                                {category["display-name"]}
+                              </IonSelectOption>
+                            )
+                          )}
+                        </IonSelect>
+                      </IonItem>
+                    </IonCol>
+                    <IonCol size="4">
+                      <IonItem>
+                        <IonLabel position="stacked">Dish</IonLabel>
+                        <IonSelect
+                          interface="popover"
+                          placeholder="category"
+                          multiple={true}
+                          {...register("rc-dish")}
+                        >
+                          {recipeCategories.dish.map(
+                            (category: any, i: number) => (
+                              <IonSelectOption key={i} value={category}>
+                                {category["display-name"]}
+                              </IonSelectOption>
+                            )
+                          )}
+                        </IonSelect>
+                      </IonItem>
+                    </IonCol>
+                    <IonCol size="4">
+                      <IonItem>
+                        <IonLabel position="stacked">Nutrition</IonLabel>
+                        <IonSelect
+                          interface="popover"
+                          placeholder="category"
+                          multiple={true}
+                          {...register("rc-nutrition")}
+                        >
+                          {recipeCategories.nutrition.map(
+                            (category: any, i: number) => (
+                              <IonSelectOption key={i} value={category}>
+                                {category["display-name"]}
+                              </IonSelectOption>
+                            )
+                          )}
+                        </IonSelect>
+                      </IonItem>
+                    </IonCol>
+                    <IonCol size="4">
+                      <IonItem>
+                        <IonLabel position="stacked">Technique</IonLabel>
+                        <IonSelect
+                          interface="popover"
+                          placeholder="category"
+                          multiple={true}
+                          {...register("rc-technique")}
+                        >
+                          {recipeCategories.technique.map(
+                            (category: any, i: number) => (
+                              <IonSelectOption key={i} value={category}>
+                                {category["display-name"]}
+                              </IonSelectOption>
+                            )
+                          )}
+                        </IonSelect>
+                      </IonItem>
+                    </IonCol>
+                  </IonRow>
+                </IonAccordion>
+              </IonAccordionGroup>
               <IonCol size="12">
                 <IonItem>
                   <IonLabel position="stacked">Ingredient</IonLabel>
@@ -179,25 +294,19 @@ const CreateRecipeModal: React.FC<{
                       </IonCol>
                       <IonCol size="3" className={styles.ingCategory}>
                         <IonItem>
-                          <Controller
-                            control={control}
-                            render={({ field }) => (
-                              <IonSelect
-                                interface="popover"
-                                value={field.value}
-                                placeholder="category"
-                              >
-                                {ingredientCategories.map(
-                                  (category: string, i: number) => (
-                                    <IonSelectOption key={i} value={category}>
-                                      {category}
-                                    </IonSelectOption>
-                                  )
-                                )}
-                              </IonSelect>
+                          <IonSelect
+                            interface="popover"
+                            placeholder="category"
+                            {...register(`ingCategory${i}`)}
+                          >
+                            {ingredientCategories.map(
+                              (category: string, i: number) => (
+                                <IonSelectOption key={i} value={category}>
+                                  {category}
+                                </IonSelectOption>
+                              )
                             )}
-                            name={`ingCategory${i}`}
-                          />
+                          </IonSelect>
                         </IonItem>
                       </IonCol>
                     </IonRow>
