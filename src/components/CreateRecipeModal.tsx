@@ -29,14 +29,14 @@ import styles from "./CreateModal.module.scss";
 const CreateRecipeModal: React.FC<{
   dismiss: any;
 }> = ({ dismiss }) => {
-  // const { addToFavorites } = useData().recipes;
+  const { addToFavorites } = useData().recipes;
   const [ingAmount, setIngAmount] = useState(5);
   const [dirAmount, setDirAmount] = useState(5);
   const [toggleDirections, setToggleDirections] = useState(false);
   const [presentToast] = useIonToast();
   const { register, handleSubmit } = useForm();
   const ingredientCategories =
-    useData().shopping.getAllShoppingListCategories();
+    useData().shopping.getAllIngredientCategories();
   useData().shopping.getAllShoppingListCategories();
   const recipeCategories = useData().recipes.getAllRecipesCategories();
   const accordionGroup = useRef<null | HTMLIonAccordionGroupElement>(null);
@@ -79,6 +79,7 @@ const CreateRecipeModal: React.FC<{
       user: true,
       rating: 5,
     };
+    console.log(newRecipe);
     for (let i = 0; i <= ingAmount - 1; i++) {
       if (recipe[`ingName${i}`].length > 0) {
         let amount = recipe[`ingAmount${i}`]
@@ -108,11 +109,12 @@ const CreateRecipeModal: React.FC<{
       }
     }
     Object.keys(newRecipe.category).forEach((categoryName: any) => {
-      console.log(categoryName, recipe[`rc-${categoryName}`]);
-      newRecipe.category[categoryName].push(recipe[`rc-${categoryName}`]);
+      if (recipe[`rc-${categoryName}`].length > 0) {
+        newRecipe.category[categoryName].push(recipe[`rc-${categoryName}`]);
+      }
     });
     console.log(newRecipe);
-    // addToFavorites(newRecipe);
+    addToFavorites(newRecipe);
     presentToast(`${newRecipe.name} has been added to your Recipes`, 3000);
     dismiss();
   };
@@ -299,7 +301,7 @@ const CreateRecipeModal: React.FC<{
                             placeholder="category"
                             {...register(`ingCategory${i}`)}
                           >
-                            {ingredientCategories.map(
+                            {Object.keys(ingredientCategories).sort().map(
                               (category: string, i: number) => (
                                 <IonSelectOption key={i} value={category}>
                                   {category}

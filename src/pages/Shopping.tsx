@@ -25,13 +25,17 @@ import { useData } from "../data/DataContext";
 import "./Shopping.css";
 
 const Shopping: React.FC = () => {
-  const { shoppingList_state, shoppingList_loading,addShoppingItem, removeShoppingItem, getShoppingListCategories } =
-    useData().shopping;
+  const {
+    shoppingList_state,
+    shoppingList_loading,
+    addShoppingItem,
+    removeShoppingItem,
+    getShoppingListCategories,
+  } = useData().shopping;
   const shoppingList = !shoppingList_loading ? shoppingList_state.docs : [];
   const { addKitchenItem } = useData().kitchen;
   const categories = getShoppingListCategories();
   const [presentToast, dismissToast] = useIonToast();
-
   const addToKitchen = (item: any) => {
     addKitchenItem(item);
     removeShoppingItem(item);

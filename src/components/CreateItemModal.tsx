@@ -31,7 +31,7 @@ const CreateItemModal: React.FC<{
   const [category, setCategory] = useState("");
   const [presentToast] = useIonToast();
   const ingredientCategories =
-    useData().shopping.getAllShoppingListCategories();
+    useData().shopping.getAllIngredientCategories();
 
   const openPicker = async () => {
     present({
@@ -131,7 +131,7 @@ const CreateItemModal: React.FC<{
                 placeholder="category"
                 onIonChange={(e) => setCategory(e.detail.value)}
               >
-                {ingredientCategories.map((category: string, i: number) => (
+                {Object.keys(ingredientCategories).sort().map((category: string, i: number) => (
                   <IonSelectOption key={i} value={category}>
                     {category}
                   </IonSelectOption>
