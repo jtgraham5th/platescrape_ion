@@ -23,6 +23,7 @@ import {
   IonItemSliding,
   IonBadge,
   IonChip,
+  useIonModal,
 } from "@ionic/react";
 import {
   starOutline,
@@ -34,6 +35,7 @@ import {
   home,
   add,
   caretBack,
+  personCircle,
 } from "ionicons/icons";
 import {
   BookmarkBorderIcon,
@@ -45,6 +47,7 @@ import EmptyContainer from "../components/EmptyContainer";
 import { useData } from "../data/DataContext";
 
 import styles from "./RecipeView.module.scss";
+import CreateRecipeModal from "../components/CreateRecipeModal";
 
 interface ContainerProps {
   recipe: any;
@@ -52,7 +55,8 @@ interface ContainerProps {
 }
 const RecipeView: React.FC<ContainerProps> = ({ recipe, close }) => {
   const { addToFavorites } = useData().recipes;
-  const { addRecipeIngredientsShopping, addShoppingItem, removeShoppingItem } = useData().shopping;
+  const { addRecipeIngredientsShopping, addShoppingItem, removeShoppingItem } =
+    useData().shopping;
   const { addRecipeIngredientsKitchen, addKitchenItem } = useData().kitchen;
   const pageRef = useRef();
   const [isFavorite, setIsFavorite] = useState(false);
@@ -61,6 +65,16 @@ const RecipeView: React.FC<ContainerProps> = ({ recipe, close }) => {
   const fridge = useData().kitchen.kitchen_state.docs;
   const [segment, setSegment] = useState("ingredients");
   const [presentToast, dismissToast] = useIonToast();
+  const [present, dismiss] = useIonModal(CreateRecipeModal, {
+    dismiss: () => dismiss(),
+    recipeData: recipe
+  });
+  const modalOptions = {
+    onDidDismiss: () => dismiss(),
+    breakpoints: [1],
+    initialBreakpoint: 1,
+    backdropBreakpoint: 1,
+  };
 
   const toggleSegment = (value: any) => {
     setSegment(value);
@@ -119,8 +133,7 @@ const RecipeView: React.FC<ContainerProps> = ({ recipe, close }) => {
   };
   const addAllToShoppingList = () => {
     addRecipeIngredientsShopping(recipe.ingredients);
-    recipe.ingredients.forEach((ingredient: any) => {
-    });
+    recipe.ingredients.forEach((ingredient: any) => {});
     presentToast({
       buttons: [{ text: "x", handler: dismissToast }],
       message: `Ingredients for '${recipe.name}' have been added to your Shopping List`,
@@ -129,8 +142,7 @@ const RecipeView: React.FC<ContainerProps> = ({ recipe, close }) => {
   };
   const addAllToKitchen = () => {
     addRecipeIngredientsKitchen(recipe.content.ingredientLines);
-    recipe.ingredients.forEach((ingredient: any) => {
-    });
+    recipe.ingredients.forEach((ingredient: any) => {});
     presentToast({
       buttons: [{ text: "x", handler: dismissToast }],
       message: `Ingredients for '${recipe.name}' have been added to your Kitchen`,
@@ -165,7 +177,7 @@ const RecipeView: React.FC<ContainerProps> = ({ recipe, close }) => {
     setIsFavorite(tempIsFavorite);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recipes]);
+  }, []);
 
   return (
     <IonPage ref={pageRef}>
@@ -220,12 +232,21 @@ const RecipeView: React.FC<ContainerProps> = ({ recipe, close }) => {
                 {recipe.time !== 0 ? `${recipe.time} mins` : "N/A"}
               </IonCardSubtitle>
             </IonCol>
-            <IonCol size="4">
-              <IonCardTitle>
-                <IonIcon icon={starOutline} />
-              </IonCardTitle>
-              <IonCardSubtitle>{recipe.rating}</IonCardSubtitle>
-            </IonCol>
+            {!recipe.user ? (
+              <IonCol size="4">
+                <IonCardTitle>
+                  <IonIcon icon={starOutline} />
+                </IonCardTitle>
+                <IonCardSubtitle>{recipe.rating}</IonCardSubtitle>
+              </IonCol>
+            ) : (
+              <IonCol size="4">
+                <IonCardTitle onClick={() => present(modalOptions)}>
+                  <IonIcon icon={personCircle} />
+                </IonCardTitle>
+                <IonCardSubtitle>Edit Recipe</IonCardSubtitle>
+              </IonCol>
+            )}
           </IonRow>
 
           <IonRow className="ion-text-center">

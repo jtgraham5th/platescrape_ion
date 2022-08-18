@@ -18,6 +18,7 @@ import {
   IonIcon,
   IonAccordion,
   IonAccordionGroup,
+  IonFooter,
 } from "@ionic/react";
 import { arrowForwardOutline, arrowBackOutline } from "ionicons/icons";
 import { useRef, useState } from "react";
@@ -28,15 +29,19 @@ import styles from "./CreateModal.module.scss";
 
 const CreateRecipeModal: React.FC<{
   dismiss: any;
-}> = ({ dismiss }) => {
-  const { addToFavorites } = useData().recipes;
-  const [ingAmount, setIngAmount] = useState(5);
-  const [dirAmount, setDirAmount] = useState(5);
+  recipeData?: any;
+}> = ({ dismiss, recipeData }) => {
+  const { addToFavorites, updateRecipe} = useData().recipes;
+  const [ingAmount, setIngAmount] = useState(
+    recipeData?.ingredients ? recipeData.ingredients.length : 5
+  );
+  const [dirAmount, setDirAmount] = useState(
+    recipeData?.directions ? recipeData.directions.length : 5
+  );
   const [toggleDirections, setToggleDirections] = useState(false);
   const [presentToast] = useIonToast();
   const { register, handleSubmit } = useForm();
-  const ingredientCategories =
-    useData().shopping.getAllIngredientCategories();
+  const ingredientCategories = useData().shopping.getAllIngredientCategories();
   useData().shopping.getAllShoppingListCategories();
   const recipeCategories = useData().recipes.getAllRecipesCategories();
   const accordionGroup = useRef<null | HTMLIonAccordionGroupElement>(null);
@@ -114,7 +119,7 @@ const CreateRecipeModal: React.FC<{
       }
     });
     console.log(newRecipe);
-    addToFavorites(newRecipe);
+    recipeData ? updateRecipe(newRecipe, recipeData) :addToFavorites(newRecipe);
     presentToast(`${newRecipe.name} has been added to your Recipes`, 3000);
     dismiss();
   };
@@ -141,7 +146,7 @@ const CreateRecipeModal: React.FC<{
                     {...register("name", {
                       required: "This is a required field",
                     })}
-                    // value={name}
+                    value={recipeData ? recipeData.name : ""}
                     // onInput={(e: any) => setName(e.target.value)}
                   />
                 </IonItem>
@@ -156,6 +161,7 @@ const CreateRecipeModal: React.FC<{
                       interface="popover"
                       placeholder="Select Serving Size"
                       {...register("servingSize")}
+                      value={recipeData ? recipeData.servings : 0}
                     >
                       {Array.apply(null, Array(20)).map((e, i) => (
                         <IonSelectOption key={i} value={i + 1}>
@@ -183,6 +189,11 @@ const CreateRecipeModal: React.FC<{
                           placeholder="category"
                           multiple={true}
                           {...register("rc-course")}
+                          value={
+                            recipeData?.category.course
+                              ? [...recipeData.category.course]
+                              : []
+                          }
                         >
                           {recipeCategories.course.map(
                             (category: any, i: number) => (
@@ -202,6 +213,11 @@ const CreateRecipeModal: React.FC<{
                           placeholder="category"
                           multiple={true}
                           {...register("rc-cuisine")}
+                          value={
+                            recipeData?.category.cuisine
+                              ? [...recipeData.category.cuisine]
+                              : []
+                          }
                         >
                           {recipeCategories.cuisine.map(
                             (category: any, i: number) => (
@@ -221,6 +237,11 @@ const CreateRecipeModal: React.FC<{
                           placeholder="category"
                           multiple={true}
                           {...register("rc-dish")}
+                          value={
+                            recipeData?.category.dish
+                              ? [...recipeData.category.dish]
+                              : []
+                          }
                         >
                           {recipeCategories.dish.map(
                             (category: any, i: number) => (
@@ -240,6 +261,11 @@ const CreateRecipeModal: React.FC<{
                           placeholder="category"
                           multiple={true}
                           {...register("rc-nutrition")}
+                          value={
+                            recipeData?.category.nutrition
+                              ? [...recipeData.category.nutrition]
+                              : []
+                          }
                         >
                           {recipeCategories.nutrition.map(
                             (category: any, i: number) => (
@@ -259,6 +285,11 @@ const CreateRecipeModal: React.FC<{
                           placeholder="category"
                           multiple={true}
                           {...register("rc-technique")}
+                          value={
+                            recipeData?.category.technique
+                              ? [...recipeData.category.technique]
+                              : []
+                          }
                         >
                           {recipeCategories.technique.map(
                             (category: any, i: number) => (
@@ -282,7 +313,11 @@ const CreateRecipeModal: React.FC<{
                         <IonInput
                           color="primary"
                           {...register(`ingAmount${i}`)}
-                          // value={name}
+                          value={
+                            recipeData?.ingredients[`${i}`].quantity
+                              ? recipeData.ingredients[`${i}`].quantity
+                              : ""
+                          }
                           // onInput={(e: any) => setName(e.target.value)}
                         />
                       </IonCol>
@@ -290,6 +325,11 @@ const CreateRecipeModal: React.FC<{
                         <IonInput
                           color="primary"
                           {...register(`ingName${i}`)}
+                          value={
+                            recipeData?.ingredients[`${i}`].name
+                              ? recipeData.ingredients[`${i}`].name
+                              : ""
+                          }
                           // value={name}
                           // onInput={(e: any) => setName(e.target.value)}
                         />
@@ -300,14 +340,19 @@ const CreateRecipeModal: React.FC<{
                             interface="popover"
                             placeholder="category"
                             {...register(`ingCategory${i}`)}
+                            value={
+                              recipeData?.ingredients[`${i}`].category
+                                ? recipeData.ingredients[`${i}`].category
+                                : ""
+                            }
                           >
-                            {Object.keys(ingredientCategories).sort().map(
-                              (category: string, i: number) => (
+                            {Object.keys(ingredientCategories)
+                              .sort()
+                              .map((category: string, i: number) => (
                                 <IonSelectOption key={i} value={category}>
                                   {category}
                                 </IonSelectOption>
-                              )
-                            )}
+                              ))}
                           </IonSelect>
                         </IonItem>
                       </IonCol>
@@ -340,6 +385,12 @@ const CreateRecipeModal: React.FC<{
                         className={styles.recipeDirections}
                         color="primary"
                         {...register(`directions${i}`)}
+                        value={
+                          recipeData?.directions[`${i}`]
+                            ? recipeData.ingredients[`${i}`].quantity
+                            : ""
+                        }
+
                         // value={name}
                         // onInput={(e: any) => setName(e.target.value)}
                       />
@@ -369,17 +420,19 @@ const CreateRecipeModal: React.FC<{
           />
           {!toggleDirections ? "Add Directions? (Optional)" : "Go back"}
         </IonButton>
-        <IonButton
-          className="create-recipe"
-          expand="full"
-          shape="round"
-          type="submit"
-          // disabled={name ? false : true}
-          // onClick={handleSubmit}
-        >
-          Done
-        </IonButton>
       </IonContent>
+      <IonFooter>
+          <IonButton
+            className="create-recipe"
+            expand="full"
+            shape="round"
+            type="submit"
+            // disabled={name ? false : true}
+            // onClick={handleSubmit}
+          >
+            Done
+          </IonButton>
+      </IonFooter>
     </form>
   );
 };

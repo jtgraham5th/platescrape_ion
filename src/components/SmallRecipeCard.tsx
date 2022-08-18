@@ -8,7 +8,7 @@ import {
   useIonModal,
   useIonToast,
 } from "@ionic/react";
-import { globeOutline, starOutline, star, eyeOutline } from "ionicons/icons";
+import { globeOutline, starOutline, star, eyeOutline, personCircle } from "ionicons/icons";
 import RecipeView from "../pages/RecipeView";
 import { BookmarkBorderIcon, BookmarkIcon, PlaylistAddIcon } from "./icons";
 import { useData } from "../data/DataContext";
@@ -101,8 +101,8 @@ const SmallRecipeCard: React.FC<ContainerProps> = ({ recipe, index }) => {
               <IonIcon icon={globeOutline} />
             </IonButton>
           </IonCol>
-          <IonCol size="12" className={styles.ratings}>
-            {Array.apply(null, Array(5)).map((e, i) =>
+          {!recipe.user ? <IonCol size="12" className={styles.ratings}>
+             {Array.apply(null, Array(5)).map((e, i) =>
               i + 1 <= recipe.rating ? (
                 <IonIcon key={i} icon={star} size="small" />
               ) : (recipe.rating % 1).toFixed(1) === "0.5" ? (
@@ -110,8 +110,8 @@ const SmallRecipeCard: React.FC<ContainerProps> = ({ recipe, index }) => {
               ) : (
                 <IonIcon key={i} icon={starOutline} size="small" />
               )
-            )}
-          </IonCol>
+            ) }
+          </IonCol>: <IonIcon icon={personCircle} size='large' className={styles.userCreated}/>}
         </IonRow>
       </IonCardContent>
     </IonCard>

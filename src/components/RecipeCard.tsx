@@ -15,6 +15,7 @@ import {
   star,
   starHalf,
   eyeOutline,
+  personCircle
 } from "ionicons/icons";
 import RecipeView from "../pages/RecipeView";
 import { BookmarkBorderIcon, BookmarkIcon, PlaylistAddIcon } from "./icons";
@@ -83,7 +84,7 @@ const RecipeCard: React.FC<ContainerProps> = ({ recipe, index }) => {
       <IonCardContent className={styles.content}>
         <IonRow className={styles.cardRow}>
           <IonCol size="4" className={styles.ratings}>
-            {Array.apply(null, Array(5)).map((e, i) =>
+            {!recipe.user ? Array.apply(null, Array(5)).map((e, i) =>
               i + 1 <= recipe.rating ? (
                 <IonIcon key={i} icon={star} size="large" />
               ) : (recipe.rating % 1).toFixed(1) === "0.5" ? (
@@ -91,7 +92,7 @@ const RecipeCard: React.FC<ContainerProps> = ({ recipe, index }) => {
               ) : (
                 <IonIcon key={i} icon={starOutline} size="large" />
               )
-            )}
+            ) : <IonIcon icon={personCircle} size="large" />}
           </IonCol>
           <IonCol size="8" className={styles.buttons}>
             <IonButton
