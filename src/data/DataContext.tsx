@@ -76,21 +76,24 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
     snapshotListenOptions: { includeMetadataChanges: true },
   });
   useEffect(() => {
-    shoppingList_state?.docs.forEach(async (ingredient: any) => {
-      const item = ingredient.data();
+    let itemCategories: any = []
+    shoppingList_state?.docs.forEach( (ingredient: any) => {
+      const item = ingredient.data()
+      itemCategories.push(item.category)
+      updateDoc(doc(db, `categories/ingredients`), {
+        [`${item.category}`]: arrayUnion(item.name),
+      });})
+
       try {
-        await updateDoc(doc(db, `users/${currentUID}/categories/shopping`), {
-          activeCategories: arrayUnion(item.category),
-          allCategories: arrayUnion(item.category),
-        });
-        await updateDoc(doc(db, `categories/ingredients`), {
-          [`${item.category}`]: arrayUnion(item.name),
+         updateDoc(doc(db, `users/${currentUID}/categories/shopping`), {
+          activeCategories: arrayUnion(...itemCategories),
+          allCategories: arrayUnion(...itemCategories),
         });
 
       } catch (err: any) {
-        await setDoc(doc(db, `users/${currentUID}/categories/shopping`), {
-          activeCategories: arrayUnion(item.category),
-          allCategories: arrayUnion(item.category),
+         setDoc(doc(db, `users/${currentUID}/categories/shopping`), {
+          activeCategories: arrayUnion(...itemCategories),
+          allCategories: arrayUnion(...itemCategories),
         });
       }
       shoppingList_categories_state
@@ -106,27 +109,29 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
             });
           }
         });
-    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shoppingList_state]);
 
   useEffect(() => {
+    let itemCategories: any = []
     kitchen_state?.docs.forEach(async (ingredient: any) => {
       const item = ingredient.data();
+      itemCategories.push(item.category)
+     updateDoc(doc(db, `categories/ingredients`), {
+        [`${item.category}`]: arrayUnion(item.name),
+      });
+
       try {
         await updateDoc(doc(db, `users/${currentUID}/categories/kitchen`), {
-          activeCategories: arrayUnion(item.category),
-          allCategories: arrayUnion(item.category),
-        });
-        await updateDoc(doc(db, `categories/ingredients`), {
-          [`${item.category}`]: arrayUnion(item.name),
+          activeCategories: arrayUnion(itemCategories),
+          allCategories: arrayUnion(itemCategories),
         });
 
       } catch (err: any) {
         console.error(err);
         await setDoc(doc(db, `users/${currentUID}/categories/kitchen`), {
-          activeCategories: arrayUnion(item.category),
-          allCategories: arrayUnion(item.category),
+          activeCategories: arrayUnion(...itemCategories),
+          allCategories: arrayUnion(...itemCategories),
         });
       }
       kitchen_categories_state
@@ -145,116 +150,65 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kitchen_state]);
-  // const shoppingCategories = async () => {
-  //   console.log(shoppingList_categories_state?.data());
-  //   kitchen_categories_state?.data()?.activeCategories.forEach(
-  //     async (categoryName: any) => {
-  //       console.log(categoryName);
-  //       await updateDoc(doc(db, `categories/ingredients`), {
-  //         [`${categoryName}`]: [],
-  //       });
-  //     }
-  //   );
-  // };
+
   useEffect(() => {
+    let courseCategories: any = []
+    let cuisineCategories: any = []
+    let dishCategories: any = []
+    let nutritionCategories: any = []
+    let techniqueCategories: any = []
     recipes_state?.docs.forEach(async (item: any) => {
       const recipe = item.data();
       recipe.category.course &&
         recipe.category.course.length > 0 &&
         recipe.category.course.forEach(async (item: any) => {
-          try {
-            await updateDoc(doc(db, `users/${currentUID}/categories/recipes`), {
-              course: arrayUnion(item),
-            });
-            await updateDoc(doc(db, `categories/recipes`), {
-              course: arrayUnion(item),
-            });
-          } catch (err: any) {
-            console.error(err);
-            await setDoc(doc(db, `users/${currentUID}/categories/recipes`), {
-              course: arrayUnion(item),
-            });
-          }
+          courseCategories.push(item)
         });
       recipe.category.cuisine &&
         recipe.category.cuisine.length > 0 &&
         recipe.category.cuisine.forEach(async (item: any) => {
-          try {
-            await updateDoc(doc(db, `users/${currentUID}/categories/recipes`), {
-              cuisine: arrayUnion(item),
-            });
-            await updateDoc(doc(db, `categories/recipes`), {
-              cuisine: arrayUnion(item),
-            });
-          } catch (err: any) {
-            console.error(err);
-            await setDoc(doc(db, `users/${currentUID}/categories/recipes`), {
-              cuisine: arrayUnion(item),
-            });
-          }
+          cuisineCategories.push(item)
         });
       recipe.category.dish &&
         recipe.category.dish.length > 0 &&
         recipe.category.dish.forEach(async (item: any) => {
-          try {
-            await updateDoc(doc(db, `users/${currentUID}/categories/recipes`), {
-              dish: arrayUnion(item),
-            });
-            await updateDoc(doc(db, `categories/recipes`), {
-              dish: arrayUnion(item),
-            });
-          } catch (err: any) {
-            console.error(err);
-            await setDoc(doc(db, `users/${currentUID}/categories/recipes`), {
-              dish: arrayUnion(item),
-            });
-          }
+          dishCategories.push(item);
         });
       recipe.category.nutrition &&
         recipe.category.nutrition.length > 0 &&
         recipe.category.nutrition.forEach(async (item: any) => {
-          try {
-            await updateDoc(doc(db, `users/${currentUID}/categories/recipes`), {
-              nutrition: arrayUnion(item),
-            });
-            await updateDoc(doc(db, `categories/recipes`), {
-              nutrition: arrayUnion(item),
-            });
-          } catch (err: any) {
-            console.error(err);
-            await setDoc(doc(db, `users/${currentUID}/categories/recipes`), {
-              nutrition: arrayUnion(item),
-            });
-          }
+          nutritionCategories.push(item)
         });
       recipe.category.technique &&
         recipe.category.technique.length > 0 &&
         recipe.category.technique.forEach(async (item: any) => {
-          try {
-            await updateDoc(doc(db, `users/${currentUID}/categories/recipes`), {
-              technique: arrayUnion(item),
-            });
-            await updateDoc(doc(db, `categories/recipes`), {
-              technique: arrayUnion(item),
-            });
-          } catch (err: any) {
-            console.error(err);
-            await setDoc(doc(db, `users/${currentUID}/categories/recipes`), {
-              technique: arrayUnion(item),
-            });
-          }
+          techniqueCategories.push(item)
         });
-      // kitchen_categories_state?.data()?.categories.forEach((category: any) => {
-      //   if (
-      //     !kitchen_state?.docs.find(
-      //       (ing: any) => ing.data().category === category
-      //     )
-      //   ) {
-      //     updateDoc(doc(db, `users/${currentUID}/categories/kitchen`), {
-      //       categories: arrayRemove(category),
-      //     });
-      //   }
-      // });
+        try {
+          await updateDoc(doc(db, `users/${currentUID}/categories/recipes`), {
+            course: arrayUnion(...courseCategories),
+            cusine: arrayUnion(...cuisineCategories),
+            dish: arrayUnion(...dishCategories),
+            nutrition: arrayUnion(...nutritionCategories),
+            technique: arrayUnion(...techniqueCategories),
+          });
+          await updateDoc(doc(db, `categories/recipes`), {
+            course: arrayUnion(...courseCategories),
+            cusine: arrayUnion(...cuisineCategories),
+            dish: arrayUnion(...dishCategories),
+            nutrition: arrayUnion(...nutritionCategories),
+            technique: arrayUnion(...techniqueCategories),
+          });
+        } catch (err: any) {
+          console.error(err);
+          await setDoc(doc(db, `users/${currentUID}/categories/recipes`), {
+            course: arrayUnion(...courseCategories),
+            cusine: arrayUnion(...cuisineCategories),
+            dish: arrayUnion(...dishCategories),
+            nutrition: arrayUnion(...nutritionCategories),
+            technique: arrayUnion(...techniqueCategories),
+          });
+        }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recipes_state]);
@@ -324,9 +278,38 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
   const getAllRecipesCategories = () => {
     return allRecipeCategories?.data();
   };
-
+  const updateRecipe = async (newRecipe: any, oldRecipe: any) => {
+    console.log(recipes_state?.docs[0].data(), oldRecipe)
+    if (
+      recipes_state?.docs.find(
+        (recipe: any) => recipe.data().name === oldRecipe.name
+      )
+    ) {
+      try {
+        await deleteDoc(doc(db, `users/${currentUID}/recipes`, oldRecipe.name));
+        await setDoc(
+          doc(db, `users/${currentUID}/recipes`, newRecipe.name),
+          newRecipe
+        );
+      } catch (err: any) {
+        console.error(err);
+        alert(err.message);
+      }
+    } else {
+      try {
+        await setDoc(
+          doc(db, `users/${currentUID}/recipes`, newRecipe.name),
+          newRecipe
+        );
+      } catch (err: any) {
+        console.error(err);
+        alert(err.message);
+      }
+    }
+  };
   ///// SHOPPING LIST FUNCTIONS ///////
   const addRecipeIngredientsShopping = (ingredientList: any) => {
+    const batch = db.batch()
     ingredientList.forEach(async (ingredient: any) => {
       /* check to see if ingredient already exisit in the shoppingList*/
       if (
@@ -348,7 +331,7 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
             unit: ingredient.unit,
             category: ingredient.category,
           };
-          await setDoc(
+          await batch.setDoc(
             doc(db, `users/${currentUID}/shoppingList`, newIngredient.name),
             newIngredient
           );
@@ -358,6 +341,7 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
         }
       }
     });
+    batch.commit()
   };
   const addShoppingItem = async (newItem: any) => {
     if (
@@ -417,6 +401,7 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
 
   ///// KITCHEN FUNCTIONS ///////
   const addRecipeIngredientsKitchen = (ingredientList: any) => {
+    const batch = db.batch()
     ingredientList.forEach(async (ingredient: any) => {
       /* check to see if ingredient already exisit in the shoppingList*/
       if (
@@ -438,7 +423,7 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
             unit: ingredient.unit,
             category: ingredient.category,
           };
-          await setDoc(
+          await batch.setDoc(
             doc(db, `users/${currentUID}/kitchen`, newIngredient.name),
             newIngredient
           );
@@ -448,6 +433,7 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
         }
       }
     });
+    batch.commit()
   };
 
   const addKitchenItem = async (newItem: any) => {
@@ -498,6 +484,7 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
     recipes_loading,
     recipes_categories_state,
     recipes_categories_loading,
+    updateRecipe,
     getRecipes,
     getRecipesCategories,
     getAllRecipesCategories,

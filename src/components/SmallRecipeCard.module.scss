@@ -25,6 +25,18 @@
     left: 30px;
     font-size: 0.8rem;
 }
+.userCreated{
+  position: absolute;
+  display: flex;
+  margin: 0 auto;
+  align-items: center;
+  justify-content: center;
+  bottom: 25px;
+  left: 105px;
+  width: 50%;
+  padding: 0.5rem;
+  color: #fff;
+}
 .buttons {
   display: flex;
   justify-content: space-evenly;
