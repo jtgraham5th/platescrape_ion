@@ -14,7 +14,6 @@ import {
   IonRow,
   IonSegment,
   IonSegmentButton,
-  IonThumbnail,
   IonToggle,
   useIonModal,
 } from "@ionic/react";
