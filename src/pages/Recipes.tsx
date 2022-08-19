@@ -3,14 +3,18 @@ import {
   IonAccordion,
   IonAccordionGroup,
   IonButton,
+  IonCol,
   IonContent,
   IonHeader,
   IonIcon,
   IonItem,
   IonLabel,
+  IonList,
   IonPage,
+  IonRow,
   IonSegment,
   IonSegmentButton,
+  IonThumbnail,
   IonToggle,
   useIonModal,
 } from "@ionic/react";
@@ -22,8 +26,9 @@ import EmptyContainer from "../components/EmptyContainer";
 import { useData } from "../data/DataContext";
 
 import "./Recipes.css";
-import { filterOutline } from "ionicons/icons";
+import { filterOutline, gridOutline, listOutline } from "ionicons/icons";
 import { useEffect, useRef, useState } from "react";
+import RecipesListItem from "../components/RecipesListItem";
 
 const Recipes: React.FC = () => {
   const {
@@ -41,6 +46,7 @@ const Recipes: React.FC = () => {
   const [category, setCategory] = useState();
   const [userCreated, setUserCreated] = useState();
   const [results, setResults] = useState(recipes);
+  const [view, setView] = useState("grid");
 
   const toggleFilter = () => {
     if (!accordionGroup.current) {
@@ -91,9 +97,10 @@ const Recipes: React.FC = () => {
 
   const accordionGroupChange = (ev: AccordionGroupCustomEvent) => {
     const selectedValue = ev.detail.value;
-    console.log(selectedValue)
-      if (selectedValue === undefined ||selectedValue === "second") { 
-        setResults(recipes) }
+    console.log(selectedValue);
+    if (selectedValue === undefined || selectedValue === "second") {
+      setResults(recipes);
+    }
   };
   return (
     <IonPage>
@@ -102,7 +109,10 @@ const Recipes: React.FC = () => {
       </IonHeader>
 
       <IonContent fullscreen>
-        <IonAccordionGroup ref={accordionGroup} onIonChange={accordionGroupChange}>
+        <IonAccordionGroup
+          ref={accordionGroup}
+          onIonChange={accordionGroupChange}
+        >
           <IonAccordion value="first">
             <IonItem slot="header" color="light">
               <IonIcon icon={filterOutline} />
@@ -144,11 +154,25 @@ const Recipes: React.FC = () => {
           </IonAccordion>
         </IonAccordionGroup>
         <IonItem>
-          <IonLabel>Show User Created Recipes</IonLabel>
-          <IonToggle
-            checked={userCreated}
-            onIonChange={(e: any) => setUserCreated(e.detail.checked)}
-          />
+          <IonRow className="customizeView">
+            <IonCol size="8">
+              <IonLabel>Show User Created Recipes</IonLabel>
+              <IonToggle
+                checked={userCreated}
+                onIonChange={(e: any) => setUserCreated(e.detail.checked)}
+              />
+            </IonCol>
+            <IonCol size="4">
+              <IonSegment onIonChange={(e: any) => setView(e.detail.value)}>
+                <IonSegmentButton value="grid">
+                  <IonIcon icon={gridOutline} />
+                </IonSegmentButton>
+                <IonSegmentButton value="list">
+                  <IonIcon icon={listOutline} />
+                </IonSegmentButton>
+              </IonSegment>
+            </IonCol>
+          </IonRow>
         </IonItem>
         <IonButton
           className="create-recipe"
@@ -160,17 +184,25 @@ const Recipes: React.FC = () => {
           Create Your Own Recipe
         </IonButton>
         {results.length > 0 ? (
-          <div className="container">
-            {results.map((recipe: any, index: number) => {
-              return (
-                <SmallRecipeCard
-                  key={index}
-                  index={index}
-                  recipe={recipe.data()}
-                />
-              );
-            })}
-          </div>
+          view === "grid" ? (
+            <div className="container">
+              {results.map((recipe: any, index: number) => {
+                return (
+                  <SmallRecipeCard
+                    key={index}
+                    index={index}
+                    recipe={recipe.data()}
+                  />
+                );
+              })}
+            </div>
+          ) : (
+            <IonList>
+              {results.map((recipe: any, index: number) => {
+                return <RecipesListItem index={index} recipe={recipe.data()} />;
+              })}
+            </IonList>
+          )
         ) : (
           <EmptyContainer name="Recipes" />
         )}
