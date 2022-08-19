@@ -3,7 +3,6 @@ import {
   IonAccordion,
   IonAccordionGroup,
   IonButton,
-  IonCheckbox,
   IonContent,
   IonHeader,
   IonIcon,
@@ -12,6 +11,7 @@ import {
   IonPage,
   IonSegment,
   IonSegmentButton,
+  IonToggle,
   useIonModal,
 } from "@ionic/react";
 import SmallRecipeCard from "../components/SmallRecipeCard";
@@ -145,7 +145,7 @@ const Recipes: React.FC = () => {
         </IonAccordionGroup>
         <IonItem>
           <IonLabel>Show User Created Recipes</IonLabel>
-          <IonCheckbox
+          <IonToggle
             checked={userCreated}
             onIonChange={(e: any) => setUserCreated(e.detail.checked)}
           />
