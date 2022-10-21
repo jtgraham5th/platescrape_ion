@@ -72,67 +72,103 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
   const [allRecipeCategories] = useDocument(doc(db, `categories/recipes`), {
     snapshotListenOptions: { includeMetadataChanges: true },
   });
-  const [allIngredientCategories] = useDocument(doc(db, `categories/ingredients`), {
-    snapshotListenOptions: { includeMetadataChanges: true },
-  });
+  const [allIngredientCategories] = useDocument(
+    doc(db, `categories/ingredients`),
+    {
+      snapshotListenOptions: { includeMetadataChanges: true },
+    }
+  );
+  let shoppingItemCategories: any = [];
+  let kitchenItemCategories: any = [];
+
   useEffect(() => {
-    let itemCategories: any = []
-    shoppingList_state?.docs.forEach( (ingredient: any) => {
-      const item = ingredient.data()
-      itemCategories.push(item.category)
-      updateDoc(doc(db, `categories/ingredients`), {
-        [`${item.category}`]: arrayUnion(item.name),
-      });})
+    if (currentUID) {
+      const allCategories = allIngredientCategories?.data();
 
-      try {
-         updateDoc(doc(db, `users/${currentUID}/categories/shopping`), {
-          activeCategories: arrayUnion(...itemCategories),
-          allCategories: arrayUnion(...itemCategories),
-        });
+      shoppingList_state?.docs.forEach((ingredient: any) => {
+        const item = ingredient.data();
+        shoppingItemCategories.push(item.category);
+        if (!allCategories?.[item.category].includes(item.name)) {
+          updateDoc(doc(db, `categories/ingredients`), {
+            [`${item.category}`]: arrayUnion(item.name),
+          });
+          console.log("--update ingredient categories--");
+        }
+      });
 
-      } catch (err: any) {
-         setDoc(doc(db, `users/${currentUID}/categories/shopping`), {
-          activeCategories: arrayUnion(...itemCategories),
-          allCategories: arrayUnion(...itemCategories),
-        });
-      }
-      shoppingList_categories_state
-        ?.data()
-        ?.activeCategories.forEach((category: any) => {
-          if (
-            !shoppingList_state?.docs.find(
-              (ing: any) => ing.data().category === category
-            )
-          ) {
-            updateDoc(doc(db, `users/${currentUID}/categories/shopping`), {
-              activeCategories: arrayRemove(category),
-            });
-          }
-        });
+      kitchen_state?.docs.forEach(async (ingredient: any) => {
+        const item = ingredient.data();
+        kitchenItemCategories.push(item.category);
+        if (!allCategories?.[item.category].includes(item.name)) {
+          updateDoc(doc(db, `categories/ingredients`), {
+            [`${item.category}`]: arrayUnion(item.name),
+          });
+          console.log("--update item categories--");
+        }
+      });
+    }
+  }, [allIngredientCategories]);
+
+  useEffect(() => {
+    const shoppingListCategories = shoppingList_categories_state?.data();
+
+    try {
+      shoppingList_state?.docs.forEach((ingredient: any) => {
+        const item = ingredient.data();
+        if (shoppingListCategories && !shoppingListCategories?.activeCategories.includes(item.category)) {
+          updateDoc(doc(db, `users/${currentUID}/categories/shopping`), {
+            activeCategories: arrayUnion(item.category),
+            allCategories: arrayUnion(item.category),
+          });
+          console.log("--update USER shopping categories--");
+        }
+      });
+    } catch (err: any) {
+      setDoc(doc(db, `users/${currentUID}/categories/shopping`), {
+        activeCategories: arrayUnion(...shoppingItemCategories),
+        allCategories: arrayUnion(...shoppingItemCategories),
+      });
+      console.log("--set USER shopping categories--");
+    }
+    shoppingList_categories_state
+      ?.data()
+      ?.activeCategories.forEach((category: any) => {
+        if (
+          !shoppingList_state?.docs.find(
+            (ing: any) => ing.data().category === category
+          )
+        ) {
+          updateDoc(doc(db, `users/${currentUID}/categories/shopping`), {
+            activeCategories: arrayRemove(category),
+          });
+          console.log("--remove USER shopping categories--");
+        }
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shoppingList_state]);
 
   useEffect(() => {
-    let itemCategories: any = []
-    kitchen_state?.docs.forEach(async (ingredient: any) => {
-      const item = ingredient.data();
-      itemCategories.push(item.category)
-     updateDoc(doc(db, `categories/ingredients`), {
-        [`${item.category}`]: arrayUnion(item.name),
-      });
+    if (currentUID) {
+      const kitchenCategories = kitchen_categories_state?.data();
 
       try {
-        await updateDoc(doc(db, `users/${currentUID}/categories/kitchen`), {
-          activeCategories: arrayUnion(itemCategories),
-          allCategories: arrayUnion(itemCategories),
+        kitchen_state?.docs.forEach((ingredient: any) => {
+          const item = ingredient.data();
+          if (kitchenCategories && !kitchenCategories?.activeCategories.includes(item.category)) {
+            updateDoc(doc(db, `users/${currentUID}/categories/kitchen`), {
+              activeCategories: arrayUnion(item.category),
+              allCategories: arrayUnion(item.category),
+            });
+            console.log("--update USER kitchen categories--");
+          }
         });
-
       } catch (err: any) {
         console.error(err);
-        await setDoc(doc(db, `users/${currentUID}/categories/kitchen`), {
-          activeCategories: arrayUnion(...itemCategories),
-          allCategories: arrayUnion(...itemCategories),
+        setDoc(doc(db, `users/${currentUID}/categories/kitchen`), {
+          activeCategories: arrayUnion(...kitchenItemCategories),
+          allCategories: arrayUnion(...kitchenItemCategories),
         });
+        console.log("--set USER kitchen categories--");
       }
       kitchen_categories_state
         ?.data()
@@ -145,77 +181,85 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
             updateDoc(doc(db, `users/${currentUID}/categories/kitchen`), {
               activeCategories: arrayRemove(category),
             });
+            console.log("--remove USER kitchen categories--");
           }
         });
-    });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kitchen_state]);
 
   useEffect(() => {
-    let courseCategories: any = []
-    let cuisineCategories: any = []
-    let dishCategories: any = []
-    let nutritionCategories: any = []
-    let techniqueCategories: any = []
-    recipes_state?.docs.forEach(async (item: any) => {
-      const recipe = item.data();
-      recipe.category.course &&
-        recipe.category.course.length > 0 &&
-        recipe.category.course.forEach(async (item: any) => {
-          courseCategories.push(item)
-        });
-      recipe.category.cuisine &&
-        recipe.category.cuisine.length > 0 &&
-        recipe.category.cuisine.forEach(async (item: any) => {
-          cuisineCategories.push(item)
-        });
-      recipe.category.dish &&
-        recipe.category.dish.length > 0 &&
-        recipe.category.dish.forEach(async (item: any) => {
-          dishCategories.push(item);
-        });
-      recipe.category.nutrition &&
-        recipe.category.nutrition.length > 0 &&
-        recipe.category.nutrition.forEach(async (item: any) => {
-          nutritionCategories.push(item)
-        });
-      recipe.category.technique &&
-        recipe.category.technique.length > 0 &&
-        recipe.category.technique.forEach(async (item: any) => {
-          techniqueCategories.push(item)
-        });
-        try {
-          await updateDoc(doc(db, `users/${currentUID}/categories/recipes`), {
-            course: arrayUnion(...courseCategories),
-            cusine: arrayUnion(...cuisineCategories),
-            dish: arrayUnion(...dishCategories),
-            nutrition: arrayUnion(...nutritionCategories),
-            technique: arrayUnion(...techniqueCategories),
+    if (currentUID) {
+      let courseCategories: any = [];
+      let cuisineCategories: any = [];
+      let dishCategories: any = [];
+      let nutritionCategories: any = [];
+      let techniqueCategories: any = [];
+      recipes_state?.docs.forEach(async (item: any) => {
+        const recipe = item.data();
+        recipe.category.course &&
+          recipe.category.course.length > 0 &&
+          recipe.category.course.forEach(async (item: any) => {
+            courseCategories.push(item);
           });
-          await updateDoc(doc(db, `categories/recipes`), {
-            course: arrayUnion(...courseCategories),
-            cusine: arrayUnion(...cuisineCategories),
-            dish: arrayUnion(...dishCategories),
-            nutrition: arrayUnion(...nutritionCategories),
-            technique: arrayUnion(...techniqueCategories),
+        recipe.category.cuisine &&
+          recipe.category.cuisine.length > 0 &&
+          recipe.category.cuisine.forEach(async (item: any) => {
+            cuisineCategories.push(item);
           });
-        } catch (err: any) {
-          console.error(err);
-          await setDoc(doc(db, `users/${currentUID}/categories/recipes`), {
-            course: arrayUnion(...courseCategories),
-            cusine: arrayUnion(...cuisineCategories),
-            dish: arrayUnion(...dishCategories),
-            nutrition: arrayUnion(...nutritionCategories),
-            technique: arrayUnion(...techniqueCategories),
+        recipe.category.dish &&
+          recipe.category.dish.length > 0 &&
+          recipe.category.dish.forEach(async (item: any) => {
+            dishCategories.push(item);
           });
-        }
-    });
+        recipe.category.nutrition &&
+          recipe.category.nutrition.length > 0 &&
+          recipe.category.nutrition.forEach(async (item: any) => {
+            nutritionCategories.push(item);
+          });
+        recipe.category.technique &&
+          recipe.category.technique.length > 0 &&
+          recipe.category.technique.forEach(async (item: any) => {
+            techniqueCategories.push(item);
+          });
+      });
+      try {
+        updateDoc(doc(db, `users/${currentUID}/categories/recipes`), {
+          course: arrayUnion(...courseCategories),
+          cusine: arrayUnion(...cuisineCategories),
+          dish: arrayUnion(...dishCategories),
+          nutrition: arrayUnion(...nutritionCategories),
+          technique: arrayUnion(...techniqueCategories),
+        });
+        console.log("--update USER recipe categories--");
+
+        updateDoc(doc(db, `categories/recipes`), {
+          course: arrayUnion(...courseCategories),
+          cusine: arrayUnion(...cuisineCategories),
+          dish: arrayUnion(...dishCategories),
+          nutrition: arrayUnion(...nutritionCategories),
+          technique: arrayUnion(...techniqueCategories),
+        });
+        console.log("--update recipe categories--");
+      } catch (err: any) {
+        console.error(err);
+        setDoc(doc(db, `users/${currentUID}/categories/recipes`), {
+          course: arrayUnion(...courseCategories),
+          cusine: arrayUnion(...cuisineCategories),
+          dish: arrayUnion(...dishCategories),
+          nutrition: arrayUnion(...nutritionCategories),
+          technique: arrayUnion(...techniqueCategories),
+        });
+        console.log("--set user recipe categories--");
+      }
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recipes_state]);
 
   const saveRecipe = async (recipe: any) => {
     try {
       await setDoc(doc(db, `users/${currentUID}/recipes`), recipe);
+      console.log("--save recipe--");
     } catch (err: any) {
       console.error(err);
       alert(err.message);
@@ -224,6 +268,7 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
   const removeRecipe = async (recipe: any) => {
     try {
       await deleteDoc(doc(db, `users/${currentUID}/recipes`, recipe));
+      console.log("--remove recipe--");
     } catch (err: any) {
       console.error(err);
       alert(err.message);
@@ -238,6 +283,7 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
     ) {
       try {
         await deleteDoc(doc(db, `users/${currentUID}/recipes`, newRecipe.name));
+        console.log("--remove from favorites--");
       } catch (err: any) {
         console.error(err);
         alert(err.message);
@@ -248,6 +294,7 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
           doc(db, `users/${currentUID}/recipes`, newRecipe.name),
           newRecipe
         );
+        console.log("--set new favorite--");
       } catch (err: any) {
         console.error(err);
         alert(err.message);
@@ -272,6 +319,8 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
         nutrition: [],
         technique: [],
       });
+      console.log("--set recipe categories if empty--");
+
       return recipes_categories_state?.data();
     }
   };
@@ -279,7 +328,7 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
     return allRecipeCategories?.data();
   };
   const updateRecipe = async (newRecipe: any, oldRecipe: any) => {
-    console.log(recipes_state?.docs[0].data(), oldRecipe)
+    console.log(recipes_state?.docs[0].data(), oldRecipe);
     if (
       recipes_state?.docs.find(
         (recipe: any) => recipe.data().name === oldRecipe.name
@@ -287,10 +336,13 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
     ) {
       try {
         await deleteDoc(doc(db, `users/${currentUID}/recipes`, oldRecipe.name));
+        console.log("--delete old recipe--");
+
         await setDoc(
           doc(db, `users/${currentUID}/recipes`, newRecipe.name),
           newRecipe
         );
+        console.log("--update with new recipe--");
       } catch (err: any) {
         console.error(err);
         alert(err.message);
@@ -301,6 +353,7 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
           doc(db, `users/${currentUID}/recipes`, newRecipe.name),
           newRecipe
         );
+        console.log("--update new recipe--");
       } catch (err: any) {
         console.error(err);
         alert(err.message);
@@ -309,7 +362,7 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
   };
   ///// SHOPPING LIST FUNCTIONS ///////
   const addRecipeIngredientsShopping = (ingredientList: any) => {
-    const batch = db.batch()
+    const batch = db.batch();
     ingredientList.forEach(async (ingredient: any) => {
       /* check to see if ingredient already exisit in the shoppingList*/
       if (
@@ -335,13 +388,14 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
             doc(db, `users/${currentUID}/shoppingList`, newIngredient.name),
             newIngredient
           );
+          console.log("--set ingredients--");
         } catch (err: any) {
           console.error(err);
           alert(err.message);
         }
       }
     });
-    batch.commit()
+    batch.commit();
   };
   const addShoppingItem = async (newItem: any) => {
     if (
@@ -360,6 +414,7 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
           doc(db, `users/${currentUID}/shoppingList`, newItem.name),
           newItem
         );
+        console.log("--set shopping list new item--");
       } catch (err: any) {
         console.error(err);
         alert(err.message);
@@ -369,6 +424,7 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
   const removeShoppingItem = async (item: any) => {
     try {
       await deleteDoc(doc(db, `users/${currentUID}/shoppingList`, item.name));
+      console.log("--remove shopping item--");
     } catch (err: any) {
       console.error(err);
       alert(err.message);
@@ -382,6 +438,8 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
         activeCategories: [],
         allCategories: [],
       });
+      console.log("--set shopping categories if empty--");
+
       return shoppingList_categories_state?.data()?.activeCategories;
     }
   };
@@ -392,16 +450,18 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
       setDoc(doc(db, `users/${currentUID}/categories/shopping`), {
         allCategories: [],
       });
+      console.log("--set shopping categories if empty #2--");
+
       return shoppingList_categories_state?.data()?.allCategories;
     }
   };
   const getAllIngredientCategories = () => {
-    return allIngredientCategories?.data()
+    return allIngredientCategories?.data();
   };
 
   ///// KITCHEN FUNCTIONS ///////
   const addRecipeIngredientsKitchen = (ingredientList: any) => {
-    const batch = db.batch()
+    const batch = db.batch();
     ingredientList.forEach(async (ingredient: any) => {
       /* check to see if ingredient already exisit in the shoppingList*/
       if (
@@ -427,13 +487,14 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
             doc(db, `users/${currentUID}/kitchen`, newIngredient.name),
             newIngredient
           );
+          console.log("--set kitchen ingredients--");
         } catch (err: any) {
           console.error(err);
           alert(err.message);
         }
       }
     });
-    batch.commit()
+    batch.commit();
   };
 
   const addKitchenItem = async (newItem: any) => {
@@ -453,6 +514,7 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
           doc(db, `users/${currentUID}/kitchen`, newItem.name),
           newItem
         );
+        console.log("--set ktichen item--");
       } catch (err: any) {
         console.error(err);
         alert(err.message);
@@ -462,6 +524,7 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
   const removeKitchenItem = async (item: any) => {
     try {
       await deleteDoc(doc(db, `users/${currentUID}/kitchen`, item.name));
+      console.log("--delete kitchen item--");
     } catch (err: any) {
       console.error(err);
       alert(err.message);
@@ -475,6 +538,8 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
         activeCategories: [],
         allCategories: [],
       });
+      console.log("--update kitchen categories--");
+
       return kitchen_categories_state?.data()?.activeCategories;
     }
   };

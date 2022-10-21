@@ -14,48 +14,100 @@ import {
   IonSelectOption,
   IonList,
   IonSelect,
-  IonTextarea,
   IonIcon,
   IonAccordion,
   IonAccordionGroup,
   IonFooter,
 } from "@ionic/react";
 import { arrowForwardOutline, arrowBackOutline } from "ionicons/icons";
-import { useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useRef, useState, useEffect } from "react";
+import { useForm, useFieldArray } from "react-hook-form";
 import { useData } from "../data/DataContext";
 
 import styles from "./CreateModal.module.scss";
+import DirectionsInput from "./DirectionsInput";
+import IngredientsInput from "./ingredientsInput";
+
+interface newRecipeCategories {
+  [key: string]: Array<string>;
+  course: Array<string>;
+  cuisine: Array<string>;
+  dish: Array<string>;
+  technique: Array<string>;
+  nutrition: Array<string>;
+}
+
+interface ingredients {
+  [key: string]: string;
+  name: string;
+  quantity: string;
+  unit: string;
+  category: string;
+}
 
 const CreateRecipeModal: React.FC<{
   dismiss: any;
   recipeData?: any;
 }> = ({ dismiss, recipeData }) => {
-  const { addToFavorites, updateRecipe} = useData().recipes;
-  const [ingAmount, setIngAmount] = useState(
-    recipeData?.ingredients ? recipeData.ingredients.length : 5
-  );
-  const [dirAmount, setDirAmount] = useState(
-    recipeData?.directions ? recipeData.directions.length : 5
-  );
+  const { addToFavorites, updateRecipe } = useData().recipes;
   const [toggleDirections, setToggleDirections] = useState(false);
   const [presentToast] = useIonToast();
-  const { register, handleSubmit } = useForm();
-  const ingredientCategories = useData().shopping.getAllIngredientCategories();
+
+  const { register, handleSubmit, unregister, control } = useForm({
+    defaultValues: {
+      name: "",
+      servings: 0,
+      time: "",
+      image: "",
+      category: {
+        course: [],
+        cuisine: [],
+        dish: [],
+        technique: [],
+        nutrition: [],
+      },
+      ingredients: [
+        { name: "", amount: "", category: "" },
+        { name: "", amount: "", category: "" },
+        { name: "", amount: "", category: "" },
+        { name: "", amount: "", category: "" },
+        { name: "", amount: "", category: "" },
+      ],
+      directions: [
+        { step: "" },
+        { step: "" },
+        { step: "" },
+        { step: "" },
+        { step: "" },
+      ],
+      user: false,
+      rating: 0,
+    },
+  });
+  const {
+    fields: ingredientFields,
+    append: ingredientAppend,
+    // remove: ingredientRemove,
+  } = useFieldArray({
+    control, // control props comes from useForm (optional: if you are using FormContext)
+    name: "ingredients", // unique name for your Field Array
+    rules: { minLength: 5 },
+  });
+  const {
+    fields: directionFields,
+    append: directionAppend,
+    // remove: directionRemove,
+  } = useFieldArray({
+    control, // control props comes from useForm (optional: if you are using FormContext)
+    name: "directions", // unique name for your Field Array
+    rules: { minLength: 5 },
+  });
+
   useData().shopping.getAllShoppingListCategories();
   const recipeCategories = useData().recipes.getAllRecipesCategories();
   const accordionGroup = useRef<null | HTMLIonAccordionGroupElement>(null);
 
-  console.log(recipeCategories);
-  interface newRecipeCategories {
-    [key: string]: Array<string>;
-    course: Array<string>;
-    cuisine: Array<string>;
-    dish: Array<string>;
-    technique: Array<string>;
-    nutrition: Array<string>;
-  }
-  const onSubmit = (recipe: any) => {
+  const onSubmit = async (recipe: any) => {
     console.log(recipe);
     let newRecipe: {
       name: string;
@@ -63,7 +115,7 @@ const CreateRecipeModal: React.FC<{
       time: string;
       image: string;
       category: newRecipeCategories;
-      ingredients: Array<any>;
+      ingredients: Array<ingredients>;
       directions: Array<any>;
       user: boolean;
       rating: number;
@@ -72,57 +124,79 @@ const CreateRecipeModal: React.FC<{
       servings: parseInt(recipe.servingSize),
       time: "",
       image: "/assets/ingredients.jpeg",
-      ingredients: [],
-      directions: [],
+      ingredients: [...recipe.ingredients],
+      directions: [...recipe.directions],
       category: {
-        course: [],
-        cuisine: [],
-        dish: [],
-        technique: [],
-        nutrition: [],
+        course: [...recipe.category.course],
+        cuisine: [...recipe.category.cuisine],
+        dish: [...recipe.category.dish],
+        technique: [...recipe.category.technique],
+        nutrition: [...recipe.category.nutrition],
       },
       user: true,
       rating: 5,
     };
+    newRecipe.ingredients = parseIngredients(recipe);
+    newRecipe.directions = parseDirections(recipe);
     console.log(newRecipe);
-    for (let i = 0; i <= ingAmount - 1; i++) {
-      if (recipe[`ingName${i}`].length > 0) {
-        let amount = recipe[`ingAmount${i}`]
-          ? recipe[`ingAmount${i}`].match(/(\d+|[^\d]+)/g)
-          : "";
-        console.log(amount);
-        let newIngredient = {
-          name: recipe[`ingName${i}`],
-          quantity: parseInt(amount[0]) ? amount[0] : "",
-          unit:
-            amount.length > 1 && parseInt(amount[0])
-              ? amount[1]
-              : parseInt(amount[0])
-              ? amount[0]
-              : "",
-          category:
-            typeof recipe[`ingCategory${i}`] === "string"
-              ? recipe[`ingCategory${i}`]
-              : "Miscellaneous",
-        };
-        newRecipe.ingredients.push(newIngredient);
-      }
-    }
-    for (let i = 0; i <= dirAmount - 1; i++) {
-      if (recipe[`directions${i}`]) {
-        newRecipe.directions.push(recipe[`directions${i}`]);
-      }
-    }
-    Object.keys(newRecipe.category).forEach((categoryName: any) => {
-      if (recipe[`rc-${categoryName}`].length > 0) {
-        newRecipe.category[categoryName].push(recipe[`rc-${categoryName}`]);
-      }
-    });
-    console.log(newRecipe);
-    recipeData ? updateRecipe(newRecipe, recipeData) :addToFavorites(newRecipe);
+    recipeData
+      ? updateRecipe(newRecipe, recipeData)
+      : addToFavorites(newRecipe);
     presentToast(`${newRecipe.name} has been added to your Recipes`, 3000);
     dismiss();
   };
+  const additionalIngredient = (e: any) => {
+    ingredientAppend({ name: "", amount: "", category: "" });
+  };
+  const additionalDirection = (e: any) => {
+    directionAppend({ step: "" });
+  };
+  const parseDirections = (recipe: any) => {
+    let parsedDirections: string[] = [];
+    recipe.directions.forEach((direction: any) => {
+      if (direction.step) {
+        parsedDirections.push(direction.step);
+      }
+    });
+    return parsedDirections;
+  };
+  const parseIngredients = (recipe: any) => {
+    let parsedIngredients: ingredients[] = [];
+    recipe.ingredients.forEach((ingredient: any, index: number) => {
+      if (ingredient.name.length) {
+        if (ingredient.amount.length > 0) {
+          let amount = ingredient.amount
+            ? ingredient.amount.match(/(\d+|[^\d]+)/g)
+            : "";
+          console.log(amount);
+          let newIngredient = {
+            name: ingredient.name,
+            quantity: parseInt(amount[0]) ? amount[0] : "",
+            unit:
+              amount.length > 1 && parseInt(amount[0])
+                ? amount[1]
+                : parseInt(amount[0])
+                ? ""
+                : amount[0],
+            category:
+              ingredient.category.length > 1
+                ? ingredient.category
+                : "Miscellaneous",
+          };
+          parsedIngredients.push(newIngredient);
+        }
+      }
+    });
+    return parsedIngredients;
+  };
+
+  useEffect(
+    () => () => {
+      unregister("name", { keepValue: true });
+      console.log("unregister");
+    },
+    [unregister]
+  );
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
@@ -146,7 +220,7 @@ const CreateRecipeModal: React.FC<{
                     {...register("name", {
                       required: "This is a required field",
                     })}
-                    value={recipeData ? recipeData.name : ""}
+                    // value={recipeData ? recipeData.name : ""}
                     // onInput={(e: any) => setName(e.target.value)}
                   />
                 </IonItem>
@@ -160,8 +234,8 @@ const CreateRecipeModal: React.FC<{
                     <IonSelect
                       interface="popover"
                       placeholder="Select Serving Size"
-                      {...register("servingSize")}
-                      value={recipeData ? recipeData.servings : 0}
+                      {...register("servings")}
+                      // value={recipeData ? recipeData.servings : 0}
                     >
                       {Array.apply(null, Array(20)).map((e, i) => (
                         <IonSelectOption key={i} value={i + 1}>
@@ -188,12 +262,12 @@ const CreateRecipeModal: React.FC<{
                           interface="popover"
                           placeholder="category"
                           multiple={true}
-                          {...register("rc-course")}
-                          value={
-                            recipeData?.category.course
-                              ? [...recipeData.category.course]
-                              : []
-                          }
+                          {...register("category.course")}
+                          // value={
+                          //   recipeData?.category.course
+                          //     ? [...recipeData.category.course]
+                          //     : []
+                          // }
                         >
                           {recipeCategories.course.map(
                             (category: any, i: number) => (
@@ -212,12 +286,12 @@ const CreateRecipeModal: React.FC<{
                           interface="popover"
                           placeholder="category"
                           multiple={true}
-                          {...register("rc-cuisine")}
-                          value={
-                            recipeData?.category.cuisine
-                              ? [...recipeData.category.cuisine]
-                              : []
-                          }
+                          {...register("category.cuisine")}
+                          // value={
+                          //   recipeData?.category.cuisine
+                          //     ? [...recipeData.category.cuisine]
+                          //     : []
+                          // }
                         >
                           {recipeCategories.cuisine.map(
                             (category: any, i: number) => (
@@ -236,12 +310,12 @@ const CreateRecipeModal: React.FC<{
                           interface="popover"
                           placeholder="category"
                           multiple={true}
-                          {...register("rc-dish")}
-                          value={
-                            recipeData?.category.dish
-                              ? [...recipeData.category.dish]
-                              : []
-                          }
+                          {...register("category.dish")}
+                          // value={
+                          //   recipeData?.category.dish
+                          //     ? [...recipeData.category.dish]
+                          //     : []
+                          // }
                         >
                           {recipeCategories.dish.map(
                             (category: any, i: number) => (
@@ -260,12 +334,12 @@ const CreateRecipeModal: React.FC<{
                           interface="popover"
                           placeholder="category"
                           multiple={true}
-                          {...register("rc-nutrition")}
-                          value={
-                            recipeData?.category.nutrition
-                              ? [...recipeData.category.nutrition]
-                              : []
-                          }
+                          {...register("category.nutrition")}
+                          // value={
+                          //   recipeData?.category.nutrition
+                          //     ? [...recipeData.category.nutrition]
+                          //     : []
+                          // }
                         >
                           {recipeCategories.nutrition.map(
                             (category: any, i: number) => (
@@ -284,12 +358,12 @@ const CreateRecipeModal: React.FC<{
                           interface="popover"
                           placeholder="category"
                           multiple={true}
-                          {...register("rc-technique")}
-                          value={
-                            recipeData?.category.technique
-                              ? [...recipeData.category.technique]
-                              : []
-                          }
+                          {...register("category.technique")}
+                          // value={
+                          //   recipeData?.category.technique
+                          //     ? [...recipeData.category.technique]
+                          //     : []
+                          // }
                         >
                           {recipeCategories.technique.map(
                             (category: any, i: number) => (
@@ -304,66 +378,28 @@ const CreateRecipeModal: React.FC<{
                   </IonRow>
                 </IonAccordion>
               </IonAccordionGroup>
+
               <IonCol size="12">
                 <IonItem>
                   <IonLabel position="stacked">Ingredient</IonLabel>
-                  {Array.apply(null, Array(ingAmount)).map((e, i) => (
-                    <IonRow key={i}>
-                      <IonCol size="3" className={styles.ingAmt}>
-                        <IonInput
-                          color="primary"
-                          {...register(`ingAmount${i}`)}
-                          value={
-                            recipeData?.ingredients[`${i}`].quantity
-                              ? recipeData.ingredients[`${i}`].quantity
-                              : ""
-                          }
-                          // onInput={(e: any) => setName(e.target.value)}
-                        />
-                      </IonCol>
-                      <IonCol size="6" className={styles.ingName}>
-                        <IonInput
-                          color="primary"
-                          {...register(`ingName${i}`)}
-                          value={
-                            recipeData?.ingredients[`${i}`].name
-                              ? recipeData.ingredients[`${i}`].name
-                              : ""
-                          }
-                          // value={name}
-                          // onInput={(e: any) => setName(e.target.value)}
-                        />
-                      </IonCol>
-                      <IonCol size="3" className={styles.ingCategory}>
-                        <IonItem>
-                          <IonSelect
-                            interface="popover"
-                            placeholder="category"
-                            {...register(`ingCategory${i}`)}
-                            value={
-                              recipeData?.ingredients[`${i}`].category
-                                ? recipeData.ingredients[`${i}`].category
-                                : ""
-                            }
-                          >
-                            {Object.keys(ingredientCategories)
-                              .sort()
-                              .map((category: string, i: number) => (
-                                <IonSelectOption key={i} value={category}>
-                                  {category}
-                                </IonSelectOption>
-                              ))}
-                          </IonSelect>
-                        </IonItem>
-                      </IonCol>
-                    </IonRow>
+
+                  {ingredientFields.map((field, index) => (
+                    <IngredientsInput
+                      key={field.id}
+                      index={index}
+                      control={control}
+                    />
                   ))}
                   <IonRow style={{ width: "100%" }}>
                     <IonCol size="12">
-                      <IonInput
-                        placeholder=" + Add Ingredient"
-                        onClick={() => setIngAmount(ingAmount + 1)}
-                      ></IonInput>
+                      <IonButton
+                        expand="full"
+                        shape="round"
+                        type="button"
+                        onClick={additionalIngredient}
+                      >
+                        + Add Ingredient
+                      </IonButton>
                     </IonCol>
                   </IonRow>
                 </IonItem>
@@ -375,33 +411,18 @@ const CreateRecipeModal: React.FC<{
             <IonCol size="12">
               <IonItem>
                 <IonLabel position="stacked">Directions</IonLabel>
-                {Array.apply(null, Array(dirAmount)).map((e, i) => (
-                  <IonRow style={{ width: "100%" }} key={i}>
-                    <IonCol size="1">
-                      <h3>{i + 1}. </h3>
-                    </IonCol>
-                    <IonCol size="11">
-                      <IonTextarea
-                        className={styles.recipeDirections}
-                        color="primary"
-                        {...register(`directions${i}`)}
-                        value={
-                          recipeData?.directions[`${i}`]
-                            ? recipeData.ingredients[`${i}`].quantity
-                            : ""
-                        }
-
-                        // value={name}
-                        // onInput={(e: any) => setName(e.target.value)}
-                      />
-                    </IonCol>
-                  </IonRow>
+                {directionFields.map((field, index) => (
+                  <DirectionsInput
+                    key={field.id}
+                    index={index}
+                    control={control}
+                  />
                 ))}
                 <IonRow style={{ width: "100%" }}>
                   <IonCol size="12">
                     <IonInput
                       placeholder=" + Add Additional Step"
-                      onClick={() => setDirAmount(dirAmount + 1)}
+                      onClick={additionalDirection}
                     ></IonInput>
                   </IonCol>
                 </IonRow>
@@ -422,16 +443,16 @@ const CreateRecipeModal: React.FC<{
         </IonButton>
       </IonContent>
       <IonFooter>
-          <IonButton
-            className="create-recipe"
-            expand="full"
-            shape="round"
-            type="submit"
-            // disabled={name ? false : true}
-            // onClick={handleSubmit}
-          >
-            Done
-          </IonButton>
+        <IonButton
+          className="create-recipe"
+          expand="full"
+          shape="round"
+          type="submit"
+          // disabled={name ? false : true}
+          // onClick={handleSubmit}
+        >
+          Done
+        </IonButton>
       </IonFooter>
     </form>
   );

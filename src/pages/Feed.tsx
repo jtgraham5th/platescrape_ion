@@ -28,11 +28,13 @@ import BrandHeader from "../components/BrandHeader";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useAuth } from "../data/AuthContext";
 import { useHistory } from "react-router";
+import EmptyContainer from "../components/EmptyContainer";
 
 const Feed: React.FC = () => {
-  const [query, setQuery] = useState(null);
+  const [query, setQuery] = useState<string>("");
   const [results, setResults] = useState([]);
   const [load, setLoad] = useState(false);
+  const [noResults, setNoResults] = useState(false);
   const categories = FeedStore.useState(getCategories);
   const tags = FeedStore.useState(getTags);
   const [segment, setSegment] = useState("cuisines");
@@ -151,6 +153,7 @@ const Feed: React.FC = () => {
 
   const searchRecipes = async (e: any) => {
     e.preventDefault();
+    setNoResults(false)
     setLoad(true);
     const options = {
       params: { start: "0", maxResult: "20", q: query },
@@ -163,7 +166,9 @@ const Feed: React.FC = () => {
       .get("https://yummly2.p.rapidapi.com/feeds/search", options)
       .then((res: any) => {
         console.log(res.data.feed);
-        setResults(res.data.feed);
+        res.data.feed.length < 1
+          ? setNoResults(true)
+          : setResults(res.data.feed);
         setLoad(false);
       });
   };
@@ -211,7 +216,10 @@ const Feed: React.FC = () => {
                   onIonChange={(e: any) => setQuery(e.detail.value)}
                   placeholder="Search by food name or ingredient"
                   color="light"
-                  onIonClear={() => setResults([])}
+                  onIonClear={() => {
+                    setResults([]);
+                    setNoResults(false);
+                  }}
                   inputMode="search"
                 />
               </IonToolbar>
@@ -223,7 +231,28 @@ const Feed: React.FC = () => {
       <IonContent scrollY={false} fullscreen>
         {Object.keys(categories).length > 2 &&
         Object.keys(tags).length > 3 &&
-        results.length < 1 ? (
+        !load &&
+        results.length > 1 ? (
+          <Virtuoso
+            className={styles.feedContent}
+            style={{ height: "100%" }}
+            totalCount={results.length}
+            itemContent={(index: number) => {
+              return (
+                <RecipeCard
+                  index={index}
+                  recipe={convertRecipe(results[index])}
+                />
+              );
+            }}
+          />
+        ) : load ? (
+          <IonRow class={styles.spinner}>
+            <IonSpinner name="lines" />
+          </IonRow>
+        ) : noResults ? (
+          <EmptyContainer searchTerm={query} />
+        ) : (
           <>
             <IonRow className="ion-text-center">
               <IonCol size="12" className={styles.segment}>
@@ -265,27 +294,7 @@ const Feed: React.FC = () => {
               }}
             />
           </>
-        ) : null}
-        {load && results.length < 0 ? (
-          <IonRow class={styles.spinner}>
-            <IonSpinner name="lines" />
-          </IonRow>
-        ) : null}
-        {results.length > 0 && !load ? (
-          <Virtuoso
-            className={styles.feedContent}
-            style={{ height: "100%" }}
-            totalCount={results.length}
-            itemContent={(index: number) => {
-              return (
-                <RecipeCard
-                  index={index}
-                  recipe={convertRecipe(results[index])}
-                />
-              );
-            }}
-          />
-        ) : null}
+        )}
       </IonContent>
     </IonPage>
   );

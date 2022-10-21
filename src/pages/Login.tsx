@@ -105,8 +105,8 @@ const Login: React.FC = () => {
 
           <IonRow className="ion-margin-top ion-padding-top">
             <IonCol size="12">
-              {fields.map((field: any) => {
-                return <CustomField field={field} errors={errors} />;
+              {fields.map((field: any, i: number) => {
+                return <CustomField key={i} field={field} errors={errors} />;
               })}
 
               <IonButton
