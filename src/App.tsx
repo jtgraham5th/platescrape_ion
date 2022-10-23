@@ -9,6 +9,7 @@ import {
   IonTabs,
   setupIonicReact,
 } from "@ionic/react";
+
 import { IonReactRouter } from "@ionic/react-router";
 import {
   FlatwareIcon,
@@ -49,7 +50,7 @@ import { DataProvider } from "./data/DataContext";
 import { PrivateRoute } from "./PrivateRoute";
 import Menu from "./components/Menu";
 
-setupIonicReact();
+setupIonicReact({ scrollAssist: false });
 
 const App: React.FC = () => {
   return (
@@ -108,7 +109,7 @@ const App: React.FC = () => {
                     </IonTabButton>
                   </IonTabBar>
                 </IonTabs>
-                </IonSplitPane>
+              </IonSplitPane>
             </IonReactRouter>
           </IonApp>
         </DataProvider>
