@@ -20,6 +20,8 @@
     "@types/react-router": "^5.1.11",
     "@types/react-router-dom": "^5.1.7",
     "axios": "^0.27.2",
+    "cordova-plugin-ionic-keyboard": "^2.2.0",
+    "cordova-plugin-ionic-webview": "^5.0.0",
     "firebase": "^9.9.1",
     "firebase-tools": "^11.3.0",
     "ionicons": "^5.4.0",

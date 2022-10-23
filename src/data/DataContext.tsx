@@ -107,6 +107,7 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
         }
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allIngredientCategories]);
 
   useEffect(() => {
