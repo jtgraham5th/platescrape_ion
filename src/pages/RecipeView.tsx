@@ -113,11 +113,11 @@ const RecipeView: React.FC<ContainerProps> = ({ recipe, close }) => {
               </IonButton>
             </IonButtons>
           </IonToolbar>
-        </div>
         <div
           className={`${styles.headerInfo} animate__animated animate__slideInLeft`}
         >
           <h1>{recipe.name}</h1>
+        </div>
         </div>
 
         <IonGrid>
