@@ -116,7 +116,10 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
     try {
       shoppingList_state?.docs.forEach((ingredient: any) => {
         const item = ingredient.data();
-        if (shoppingListCategories && !shoppingListCategories?.activeCategories.includes(item.category)) {
+        if (
+          shoppingListCategories &&
+          !shoppingListCategories?.activeCategories.includes(item.category)
+        ) {
           updateDoc(doc(db, `users/${currentUID}/categories/shopping`), {
             activeCategories: arrayUnion(item.category),
             allCategories: arrayUnion(item.category),
@@ -155,7 +158,10 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
       try {
         kitchen_state?.docs.forEach((ingredient: any) => {
           const item = ingredient.data();
-          if (kitchenCategories && !kitchenCategories?.activeCategories.includes(item.category)) {
+          if (
+            kitchenCategories &&
+            !kitchenCategories?.activeCategories.includes(item.category)
+          ) {
             updateDoc(doc(db, `users/${currentUID}/categories/kitchen`), {
               activeCategories: arrayUnion(item.category),
               allCategories: arrayUnion(item.category),
@@ -233,15 +239,62 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
           technique: arrayUnion(...techniqueCategories),
         });
         console.log("--update USER recipe categories--");
-
-        updateDoc(doc(db, `categories/recipes`), {
-          course: arrayUnion(...courseCategories),
-          cusine: arrayUnion(...cuisineCategories),
-          dish: arrayUnion(...dishCategories),
-          nutrition: arrayUnion(...nutritionCategories),
-          technique: arrayUnion(...techniqueCategories),
-        });
-        console.log("--update recipe categories--");
+        // compare recipe state user categories with global categories if different then add recipe categories to global
+        // const allCategories = allRecipeCategories?.data();
+        // allCategories?.course.forEach((course: any) => {
+        //   let courseCategoryFiltered = courseCategories.find(
+        //     (category: any) =>
+        //       category["display-name"] !== course["display-name"]
+        //   );
+        //     // console.log(courseCategoryFiltered);
+        // });
+        // allCategories?.cuisine.forEach((cuisine: any) => {
+        //   let cuisineCategoryFiltered = cuisineCategories.filter(
+        //     (category: any) =>
+        //       category["display-name"] != cuisine["display-name"]
+        //   );
+        //   // if (cuisineCategoryFiltered.length > 0)
+        //     // console.log(cuisineCategoryFiltered);
+        // });
+        // allCategories?.dish.forEach((dish: any) => {
+        //   let dishCategoryFiltered = dishCategories.filter(
+        //     (category: any) => category["display-name"] != dish["display-name"]
+        //   );
+        //   // if (dishCategoryFiltered.length > 0)
+        //     // console.log(dishCategoryFiltered);
+        // });
+        // allCategories?.nutrition.forEach((nutrition: any) => {
+        //   let nutritionCategoryFiltered = nutritionCategories.filter(
+        //     (category: any) =>
+        //       category["display-name"] != nutrition["display-name"]
+        //   );
+        //   // if (nutritionCategoryFiltered.length > 0)
+        //     // console.log(
+        //     //   nutritionCategoryFiltered
+        //     // );
+        // });
+        // console.log(allCategories?.course, courseCategories)
+        // console.log(allCategories?.course != courseCategories)
+        // console.log(allCategories?.cuisine, cuisineCategories)
+        // console.log(allCategories?.cuisine === cuisineCategories)
+        // shoppingList_state?.docs.forEach((ingredient: any) => {
+        //   const item = ingredient.data();
+        //   shoppingItemCategories.push(item.category);
+        //   if (!allCategories?.[item.category].includes(item.name)) {
+        //     updateDoc(doc(db, `categories/ingredients`), {
+        //       [`${item.category}`]: arrayUnion(item.name),
+        //     });
+        //     console.log("--update ingredient categories--");
+        //   }
+        // });
+        // updateDoc(doc(db, `categories/recipes`), {
+        //   course: arrayUnion(...courseCategories),
+        //   cusine: arrayUnion(...cuisineCategories),
+        //   dish: arrayUnion(...dishCategories),
+        //   nutrition: arrayUnion(...nutritionCategories),
+        //   technique: arrayUnion(...techniqueCategories),
+        // });
+        // console.log("--update recipe categories--");
       } catch (err: any) {
         console.error(err);
         setDoc(doc(db, `users/${currentUID}/categories/recipes`), {

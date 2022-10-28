@@ -164,19 +164,18 @@ const CreateRecipeModal: React.FC<{
     let parsedIngredients: ingredients[] = [];
     recipe.ingredients.forEach((ingredient: any, index: number) => {
       if (ingredient.name.length) {
-        if (ingredient.amount.length > 0) {
           let amount = ingredient.amount
             ? ingredient.amount.match(/(\d+|[^\d]+)/g)
-            : "";
+            : " ";
           console.log(amount);
           let newIngredient = {
             name: ingredient.name,
-            quantity: parseInt(amount[0]) ? amount[0] : "",
+            quantity: parseInt(amount[0]) ? amount[0] : " ",
             unit:
               amount.length > 1 && parseInt(amount[0])
                 ? amount[1]
                 : parseInt(amount[0])
-                ? ""
+                ? " "
                 : amount[0],
             category:
               ingredient.category.length > 1
@@ -184,7 +183,6 @@ const CreateRecipeModal: React.FC<{
                 : "Miscellaneous",
           };
           parsedIngredients.push(newIngredient);
-        }
       }
     });
     return parsedIngredients;
