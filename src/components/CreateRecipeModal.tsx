@@ -53,35 +53,75 @@ const CreateRecipeModal: React.FC<{
   const [toggleDirections, setToggleDirections] = useState(false);
   const [presentToast] = useIonToast();
 
+  const sortIngredients = (ingredients: Array<any>) => {
+    let sortedIngredients: {
+      name: string;
+      amount: string;
+      category: string;
+    }[] = [];
+    ingredients.forEach((ingredient: any) =>  {
+      let ingredientObject = { name: "", amount: "", category: "" };
+      ingredientObject.name = ingredient.name;
+      ingredientObject.amount =
+        ingredient.quantity.toString() + " " + ingredient.unit.toString();
+      ingredientObject.category = ingredient.category;
+      sortedIngredients.push(ingredientObject);
+    });
+    return sortedIngredients;
+  };
+  const sortDirections = (directions: Array<any>) => {
+    let sortedDirections: {
+      step: string;
+    }[] = [];
+    directions.forEach((direction: any) => {
+      let directionObject = { step: "" };
+      directionObject.step = direction;
+      sortedDirections.push(directionObject);
+    });
+    return sortedDirections;
+  };
+
   const { register, handleSubmit, unregister, control } = useForm({
     defaultValues: {
-      name: "",
-      servings: 0,
+      name: recipeData ? recipeData.name : "",
+      servings: recipeData ? recipeData.servings : 0,
       time: "",
       image: "",
       category: {
-        course: [],
-        cuisine: [],
-        dish: [],
-        technique: [],
-        nutrition: [],
+        course: recipeData?.category.course
+          ? [...recipeData.category.course]
+          : [],
+        cuisine: recipeData?.category.cuisine
+          ? [...recipeData.category.cuisine]
+          : [],
+        dish: recipeData?.category.dish ? [...recipeData.category.dish] : [],
+        technique: recipeData?.category.technique
+          ? [...recipeData.category.technique]
+          : [],
+        nutrition: recipeData?.category.nutrition
+          ? [...recipeData.category.nutrition]
+          : [],
       },
-      ingredients: [
-        { name: "", amount: "", category: "" },
-        { name: "", amount: "", category: "" },
-        { name: "", amount: "", category: "" },
-        { name: "", amount: "", category: "" },
-        { name: "", amount: "", category: "" },
-      ],
-      directions: [
-        { step: "" },
-        { step: "" },
-        { step: "" },
-        { step: "" },
-        { step: "" },
-      ],
+      ingredients: recipeData
+        ? sortIngredients(recipeData.ingredients)
+        : [
+            { name: "", amount: "", category: "" },
+            { name: "", amount: "", category: "" },
+            { name: "", amount: "", category: "" },
+            { name: "", amount: "", category: "" },
+            { name: "", amount: "", category: "" },
+          ],
+      directions: recipeData
+        ? sortDirections(recipeData.directions)
+        : [
+            { step: "" },
+            { step: "" },
+            { step: "" },
+            { step: "" },
+            { step: "" },
+          ],
       user: false,
-      rating: 0,
+      rating: recipeData ? recipeData.rating : 0,
     },
   });
   const {
@@ -164,25 +204,25 @@ const CreateRecipeModal: React.FC<{
     let parsedIngredients: ingredients[] = [];
     recipe.ingredients.forEach((ingredient: any, index: number) => {
       if (ingredient.name.length) {
-          let amount = ingredient.amount
-            ? ingredient.amount.match(/(\d+|[^\d]+)/g)
-            : " ";
-          console.log(amount);
-          let newIngredient = {
-            name: ingredient.name,
-            quantity: parseInt(amount[0]) ? amount[0] : " ",
-            unit:
-              amount.length > 1 && parseInt(amount[0])
-                ? amount[1]
-                : parseInt(amount[0])
-                ? " "
-                : amount[0],
-            category:
-              ingredient.category.length > 1
-                ? ingredient.category
-                : "Miscellaneous",
-          };
-          parsedIngredients.push(newIngredient);
+        let amount = ingredient.amount
+          ? ingredient.amount.match(/(\d+|[^\d]+)/g)
+          : " ";
+        console.log(amount);
+        let newIngredient = {
+          name: ingredient.name,
+          quantity: parseInt(amount[0]) ? amount[0] : " ",
+          unit:
+            amount.length > 1 && parseInt(amount[0])
+              ? amount[1]
+              : parseInt(amount[0])
+              ? " "
+              : amount[0],
+          category:
+            ingredient.category.length > 1
+              ? ingredient.category
+              : "Miscellaneous",
+        };
+        parsedIngredients.push(newIngredient);
       }
     });
     return parsedIngredients;

@@ -382,7 +382,7 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
     return allRecipeCategories?.data();
   };
   const updateRecipe = async (newRecipe: any, oldRecipe: any) => {
-    console.log(recipes_state?.docs[0].data(), oldRecipe);
+    console.log(newRecipe, oldRecipe);
     if (
       recipes_state?.docs.find(
         (recipe: any) => recipe.data().name === oldRecipe.name
