@@ -23,10 +23,14 @@ import { arrowForwardOutline, arrowBackOutline } from "ionicons/icons";
 import { useRef, useState, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useData } from "../data/DataContext";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { useAuth } from "../data/AuthContext";
 
 import styles from "./CreateModal.module.scss";
 import DirectionsInput from "./DirectionsInput";
 import IngredientsInput from "./ingredientsInput";
+
+import CreateRecipeImage from "./CreateRecipeImage";
 
 interface newRecipeCategories {
   [key: string]: Array<string>;
@@ -52,6 +56,11 @@ const CreateRecipeModal: React.FC<{
   const { addToFavorites, updateRecipe } = useData().recipes;
   const [toggleDirections, setToggleDirections] = useState(false);
   const [presentToast] = useIonToast();
+  const [recipeImage, setRecipeImage] = useState();
+
+  const { storage } = useData();
+  const { getUser } = useAuth();
+  const userID = getUser().uid;
 
   const sortIngredients = (ingredients: Array<any>) => {
     let sortedIngredients: {
@@ -59,7 +68,7 @@ const CreateRecipeModal: React.FC<{
       amount: string;
       category: string;
     }[] = [];
-    ingredients.forEach((ingredient: any) =>  {
+    ingredients.forEach((ingredient: any) => {
       let ingredientObject = { name: "", amount: "", category: "" };
       ingredientObject.name = ingredient.name;
       ingredientObject.amount =
@@ -79,6 +88,25 @@ const CreateRecipeModal: React.FC<{
       sortedDirections.push(directionObject);
     });
     return sortedDirections;
+  };
+
+  const uploadPhoto = async (recipeImage: any, recipeName: string) => {
+    let webpath: any | URL = recipeImage;
+    const storageRef = ref(storage, `${userID}/${recipeName}`);
+    const response: string = await fetch(webpath)
+      .then((res) => res.blob())
+      // we create a new request using the Request() constructor, then use it to fetch a JPG.
+      .then(
+        async (myBlob: any) =>
+          await uploadBytes(storageRef, myBlob).then(
+            async (snapshot) =>
+              await getDownloadURL(
+                ref(storage, `${userID}/${recipeName}`)
+              ).then((url) => url as string)
+          )
+      );
+    const photoUrl: string = response;
+    return photoUrl;
   };
 
   const { register, handleSubmit, unregister, control } = useForm({
@@ -176,6 +204,9 @@ const CreateRecipeModal: React.FC<{
       user: true,
       rating: 5,
     };
+    await uploadPhoto(recipeImage, newRecipe.name).then((value) => {
+      newRecipe.image = recipeImage ? value : "/assets/ingredients.jpeg";
+    });
     newRecipe.ingredients = parseIngredients(recipe);
     newRecipe.directions = parseDirections(recipe);
     console.log(newRecipe);
@@ -207,7 +238,6 @@ const CreateRecipeModal: React.FC<{
         let amount = ingredient.amount
           ? ingredient.amount.match(/(\d+|[^\d]+)/g)
           : " ";
-        console.log(amount);
         let newIngredient = {
           name: ingredient.name,
           quantity: parseInt(amount[0]) ? amount[0] : " ",
@@ -235,7 +265,6 @@ const CreateRecipeModal: React.FC<{
     },
     [unregister]
   );
-
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
       <IonHeader translucent>
@@ -258,12 +287,16 @@ const CreateRecipeModal: React.FC<{
                     {...register("name", {
                       required: "This is a required field",
                     })}
-                    // value={recipeData ? recipeData.name : ""}
-                    // onInput={(e: any) => setName(e.target.value)}
                   />
                 </IonItem>
               </IonCol>
             </IonRow>
+
+            <CreateRecipeImage
+              recipeData={recipeData}
+              image={recipeImage}
+              setImage={setRecipeImage}
+            />
             <IonRow className="search-container animate__animated animate__fadeIn">
               <IonCol size="12">
                 <IonList>
@@ -273,7 +306,6 @@ const CreateRecipeModal: React.FC<{
                       interface="popover"
                       placeholder="Select Serving Size"
                       {...register("servings")}
-                      // value={recipeData ? recipeData.servings : 0}
                     >
                       {Array.apply(null, Array(20)).map((e, i) => (
                         <IonSelectOption key={i} value={i + 1}>

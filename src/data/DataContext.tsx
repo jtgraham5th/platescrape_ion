@@ -15,13 +15,15 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import { useCollection, useDocument } from "react-firebase-hooks/firestore";
-// import { useFirebaseApp } from "./FirebaseContext";
+import { useFirebaseApp } from "./FirebaseContext";
 import React from "react";
+import { getStorage, FirebaseStorage } from "firebase/storage";
 
 type DataContextProps = {
   recipes: any;
   kitchen: any;
   shopping: any;
+  storage: FirebaseStorage
 };
 
 const DataContext = React.createContext<DataContextProps>(undefined!);
@@ -629,9 +631,10 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
     addKitchenItem,
     removeKitchenItem,
   };
+  const storage = getStorage(useFirebaseApp());
 
   return (
-    <DataContext.Provider value={{ recipes, kitchen, shopping }}>
+    <DataContext.Provider value={{ recipes, kitchen, shopping, storage }}>
       {props.children}
     </DataContext.Provider>
   );

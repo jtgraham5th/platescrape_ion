@@ -59,7 +59,7 @@ export function FirebaseAppProvider(props: React.PropsWithChildren<FirebaseAppPr
       return initializeApp(firebaseConfig, appName);
     }
   }, [props.firebaseApp, firebaseConfig, appName]);
-
+  
   return (
     <FirebaseAppContext.Provider value={firebaseApp}>
       <SuspenseEnabledContext.Provider value={suspense ?? false} {...props} />
