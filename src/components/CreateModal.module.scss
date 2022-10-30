@@ -69,3 +69,31 @@
   overflow: hidden;
   z-index: 0;
 }
+.uploadImgCard {
+  margin: 0.5rem !important;
+  height: 7rem
+}
+.uploadImgContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 0;
+  line-height: 0 !important;
+  height: 100%;
+
+  img {
+    height: 100%;
+    object-fit: cover !important;
+  }
+}
+.uploadImgDirections {
+  display: flex;
+  text-align: center;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.uploadImgIcon {
+  font-size: 50px;
+}
