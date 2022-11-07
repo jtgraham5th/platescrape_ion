@@ -83,14 +83,7 @@ const CreateRecipeImage: React.FC<{
       setImage(reader.result);
     };
     reader.readAsDataURL(event.target.files[0]);
-    console.log("fileObj is", fileObj);
-    // 👇️ reset file input
-    event.target.value = null;
-    // 👇️ is now empty
-    console.log(event.target.files);
-    // 👇️ can still access file object here
-    console.log(fileObj);
-    console.log(fileObj.name);
+    dismissPopover()
   };
 
   const takePicture = async () => {

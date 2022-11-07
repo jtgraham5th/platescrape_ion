@@ -1,6 +1,6 @@
 import { IonContent, IonIcon } from "@ionic/react";
 import { useState } from "react";
-import { cameraReverse, ellipse, } from "ionicons/icons";
+import { cameraReverse, radioButtonOnOutline, } from "ionicons/icons";
 import { useCamera } from "../data/MediaAccess";
 
 const OpenCameraModal: React.FC<{
@@ -36,7 +36,7 @@ const OpenCameraModal: React.FC<{
       />
       <IonIcon
         id="CaptureImageButton"
-        icon={ellipse}
+        icon={radioButtonOnOutline}
         style={{
           width: "75px",
           height: "75px",

@@ -182,6 +182,7 @@ const Recipes: React.FC = () => {
           <IonIcon src={PostAddIcon} />
           Create Your Own Recipe
         </IonButton>
+
         {results.length > 0 ? (
           view === "grid" ? (
             <div className="container">
@@ -196,11 +197,16 @@ const Recipes: React.FC = () => {
               })}
             </div>
           ) : (
-            <IonList>
-              {results.map((recipe: any, index: number) => {
-                return <RecipesListItem index={index} recipe={recipe.data()} />;
-              })}
-            </IonList>
+            <div className="recipeList">
+              <IonList>
+                {results.map((recipe: any, index: number) => {
+                  return (
+                    <RecipesListItem index={index} recipe={recipe.data()} />
+                  );
+                })}
+                <IonItem>k</IonItem>
+              </IonList>
+            </div>
           )
         ) : (
           <EmptyContainer name="Recipes" />
