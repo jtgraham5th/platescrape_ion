@@ -13,10 +13,14 @@
   align-items: center;
   font-size: small;
   flex-wrap: nowrap;
-  width: 100%
+  width: 100%;
 }
 .customizeView > ion-col {
   display: flex;
   align-items: center;
   justify-content: space-evenly;
+}
+
+ion-popover.uploadImgPopover::part(content) {
+  left: 215px !important
 }
