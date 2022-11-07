@@ -24,3 +24,7 @@
 ion-popover.uploadImgPopover::part(content) {
   left: 215px !important
 }
+.recipeList {
+  height: 78%;
+  overflow: auto;
+}

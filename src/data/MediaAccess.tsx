@@ -10,15 +10,15 @@ export const useCamera = () => {
   const [cameraFacingMode, handleCameraFacingMode] =
     useState<CameraFacingMode>("environment");
   const [imageData, handleImageData] = useState("");
-  const videoRef = useRef<MediaStream>();
-  let video: HTMLVideoElement;
-  let canvas: HTMLCanvasElement;
+  const videoRef = useRef<HTMLVideoElement>();
+  const canvasRef = useRef<HTMLCanvasElement>();
+  const streamRef = useRef<MediaStream>();
 
   useEffect(() => {
     try {
       //find video and canvas elements by tagNames
-      video = document.getElementsByTagName("video")[0];
-      canvas = document.getElementsByTagName("canvas")[0];
+      videoRef.current = document.getElementsByTagName("video")[0];
+      canvasRef.current = document.getElementsByTagName("canvas")[0];
       let constraint = {
         video: {
           width: { ideal: 4096 },
@@ -30,21 +30,32 @@ export const useCamera = () => {
       navigator.mediaDevices
         .getUserMedia(constraint)
         .then((stream) => {
-          video.setAttribute("playsinline", "true");
-          videoRef.current = stream;
-          video.srcObject = stream;
-          video.onloadedmetadata = () => {
-            //get position of video tag;
-            let { clientLeft, clientTop, videoWidth, videoHeight } = video;
-            handleVideoDem({ w: videoWidth, h: videoHeight });
-            //align canvas position with video position
-            canvas.style.position = "absolute";
-            canvas.style.left = clientLeft.toString();
-            canvas.style.top = clientTop.toString();
-            canvas.setAttribute("width", videoWidth.toString());
-            canvas.setAttribute("height", videoHeight.toString());
-            video.play();
-          };
+          if (videoRef.current !== undefined && canvasRef.current !== undefined) {
+            videoRef.current?.setAttribute("playsinline", "true");
+            streamRef.current = stream;
+            videoRef.current.srcObject = stream;
+            videoRef.current.onloadedmetadata = () => {
+              //get position of video tag;
+              if (
+                videoRef.current !== undefined &&
+                canvasRef.current !== undefined
+              ) {
+                let { clientLeft, clientTop, videoWidth, videoHeight } =
+                  videoRef.current;
+                handleVideoDem({ w: videoWidth, h: videoHeight });
+                //align canvas position with video position
+                canvasRef.current.style.position = "absolute";
+                canvasRef.current.style.left = clientLeft.toString();
+                canvasRef.current.style.top = clientTop.toString();
+                canvasRef.current.setAttribute("width", videoWidth.toString());
+                canvasRef.current.setAttribute(
+                  "height",
+                  videoHeight.toString()
+                );
+                videoRef.current.play();
+              }
+            };
+          }
         })
         .catch((e) => {
           console.log(e);
@@ -63,10 +74,10 @@ export const useCamera = () => {
     );
   };
   const stopCamera = () => {
-    videoRef.current?.getTracks().forEach((track) => {
+    streamRef.current?.getTracks().forEach((track) => {
       track.stop();
     });
-    console.log(videoRef.current);
+    console.log(streamRef.current);
   };
 
   const captureImage = async (): Promise<string> => {
