@@ -23,7 +23,11 @@ import { arrowForwardOutline, arrowBackOutline } from "ionicons/icons";
 import { useRef, useState, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useData } from "../data/DataContext";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import {
+  ref,
+  getDownloadURL,
+  uploadString,
+} from "firebase/storage";
 import { useAuth } from "../data/AuthContext";
 
 import styles from "./CreateModal.module.scss";
@@ -56,7 +60,9 @@ const CreateRecipeModal: React.FC<{
   const { addToFavorites, updateRecipe } = useData().recipes;
   const [toggleDirections, setToggleDirections] = useState(false);
   const [presentToast] = useIonToast();
-  const [recipeImage, setRecipeImage] = useState();
+  const [recipeImage, setRecipeImage] = useState(
+    recipeData ? recipeData.image : ""
+  );
 
   const { storage } = useData();
   const { getUser } = useAuth();
@@ -68,6 +74,7 @@ const CreateRecipeModal: React.FC<{
       amount: string;
       category: string;
     }[] = [];
+
     ingredients.forEach((ingredient: any) => {
       let ingredientObject = { name: "", amount: "", category: "" };
       ingredientObject.name = ingredient.name;
@@ -91,20 +98,24 @@ const CreateRecipeModal: React.FC<{
   };
 
   const uploadPhoto = async (recipeImage: any, recipeName: string) => {
-    let webpath: any | URL = recipeImage;
+    // let webpath: any | URL = recipeImage;
     const storageRef = ref(storage, `${userID}/${recipeName}`);
-    const response: string = await fetch(webpath)
-      .then((res) => res.blob())
-      // we create a new request using the Request() constructor, then use it to fetch a JPG.
-      .then(
-        async (myBlob: any) =>
-          await uploadBytes(storageRef, myBlob).then(
-            async (snapshot) =>
-              await getDownloadURL(
-                ref(storage, `${userID}/${recipeName}`)
-              ).then((url) => url as string)
-          )
-      );
+    // const response: string = await fetch(webpath)
+    //   .then((res) => res.blob())
+    //   // we create a new request using the Request() constructor, then use it to fetch a JPG.
+    //   .then(
+    //     async (myBlob: any) =>
+    // await uploadBytes(storageRef, myBlob).then( <---- Use with blobs not image strings
+    const response = await uploadString(
+      storageRef,
+      recipeImage,
+      "data_url"
+    ).then(
+      async (snapshot) =>
+        await getDownloadURL(ref(storage, `${userID}/${recipeName}`)).then(
+          (url) => url as string
+        )
+    );
     const photoUrl: string = response;
     return photoUrl;
   };
@@ -114,7 +125,7 @@ const CreateRecipeModal: React.FC<{
       name: recipeData ? recipeData.name : "",
       servings: recipeData ? recipeData.servings : 0,
       time: "",
-      image: "",
+      image: recipeImage,
       category: {
         course: recipeData?.category.course
           ? [...recipeData.category.course]
@@ -191,7 +202,7 @@ const CreateRecipeModal: React.FC<{
       name: recipe.name,
       servings: parseInt(recipe.servingSize),
       time: "",
-      image: "/assets/ingredients.jpeg",
+      image: "",
       ingredients: [...recipe.ingredients],
       directions: [...recipe.directions],
       category: {
