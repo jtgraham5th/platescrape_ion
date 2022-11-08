@@ -13,16 +13,18 @@ import {
   IonLabel,
   IonList,
   IonPage,
+  IonSearchbar,
   useIonModal,
   useIonToast,
 } from "@ionic/react";
-import { trashBin, addCircleOutline, addOutline } from "ionicons/icons";
+import { trashBin, addCircleOutline, addOutline, searchSharp } from "ionicons/icons";
 import CreateItemModal from "../components/CreateItemModal";
 import BrandHeader from "../components/BrandHeader";
 import EmptyContainer from "../components/EmptyContainer";
 import { useData } from "../data/DataContext";
 
 import "./Shopping.css";
+import { useState } from "react";
 
 const Shopping: React.FC = () => {
   const {
@@ -35,6 +37,7 @@ const Shopping: React.FC = () => {
   const shoppingList = !shoppingList_loading ? shoppingList_state.docs : [];
   const { addKitchenItem } = useData().kitchen;
   const categories = getShoppingListCategories();
+  const [results, setResults] = useState(shoppingList);
   const [presentToast, dismissToast] = useIonToast();
   const addToKitchen = (item: any) => {
     addKitchenItem(item);
@@ -56,6 +59,20 @@ const Shopping: React.FC = () => {
     initialBreakpoint: 0.75,
     backdropBreakpoint: 0.75,
   };
+  const search = (e: any) => {
+    const searchTerm = e.currentTarget.value;
+    console.log(searchTerm);
+
+    if (searchTerm !== "") {
+      const searchTermLower = searchTerm.toLowerCase();
+      const newResults = shoppingList.filter((e: any) =>
+        e.data().name.toLowerCase().includes(searchTermLower)
+      );
+      setResults(newResults);
+    } else {
+      setResults(shoppingList);
+    }
+  };
 
   return (
     <IonPage>
@@ -63,6 +80,12 @@ const Shopping: React.FC = () => {
         <BrandHeader />
       </IonHeader>
       <IonContent fullscreen>
+      <IonSearchbar
+          onIonChange={(e) => search(e)}
+          id="searchbar"
+          searchIcon={searchSharp}
+          placeholder="Search Ingredients"
+        />
         {!shoppingList_loading && shoppingList.length > 0 ? (
           <IonList>
             {categories.map((category: any, i: number) => {
@@ -72,7 +95,7 @@ const Shopping: React.FC = () => {
                     <IonLabel className="category-label">{category}</IonLabel>
                   </IonItemDivider>
 
-                  {shoppingList.map((item: any, index: number) => {
+                  {results.map((item: any, index: number) => {
                     const ingredient = item.data();
                     return ingredient.category === category ? (
                       <IonItemSliding key={index} className="slider">

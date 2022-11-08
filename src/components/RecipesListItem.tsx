@@ -56,17 +56,22 @@ const RecipesListItem: React.FC<ContainerProps> = ({ recipe, index }) => {
       <IonThumbnail slot="start">
         <img src={recipe.image} alt={recipe.name} />
       </IonThumbnail>
-      <IonLabel>{recipe.name}</IonLabel>
+      <IonLabel className={styles.itemLabel}>{recipe.name}</IonLabel>
       {!recipe.user ? (
-        <IonIcon icon={starOutline} slot="end" size="small">
-          {recipe.rating}
-        </IonIcon>
+        <>
+          <IonIcon
+            icon={starOutline}
+            size="small"
+            className={styles.itembuttons}
+            />
+            <small>{recipe.rating}</small>
+        </>
       ) : (
         <IonIcon
           slot="end"
           icon={personCircle}
           size="small"
-          className={styles.userCreated}
+          className={styles.itembuttons}
         />
       )}
 
@@ -74,17 +79,24 @@ const RecipesListItem: React.FC<ContainerProps> = ({ recipe, index }) => {
         slot="end"
         fill="clear"
         size="small"
+        className={styles.itembuttons}
         onClick={() => addRecipe(recipe)}
       >
         <IonIcon src={PlaylistAddIcon} />
       </IonButton>
-      <IonButton slot="end" fill="clear" size="small">
+      <IonButton
+        slot="end"
+        fill="clear"
+        size="small"
+        className={styles.itembuttons}
+      >
         <IonIcon icon={globeOutline} />
       </IonButton>
       <IonButton
         slot="end"
         fill="clear"
         size="small"
+        className={styles.itembuttons}
         onClick={() => present(modalOptions)}
       >
         <IonIcon icon={eyeOutline} />

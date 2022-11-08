@@ -12,6 +12,7 @@ import {
   IonList,
   IonPage,
   IonRow,
+  IonSearchbar,
   IonSegment,
   IonSegmentButton,
   IonToggle,
@@ -25,7 +26,12 @@ import EmptyContainer from "../components/EmptyContainer";
 import { useData } from "../data/DataContext";
 
 import "./Recipes.css";
-import { filterOutline, gridOutline, listOutline } from "ionicons/icons";
+import {
+  filterOutline,
+  gridOutline,
+  listOutline,
+  searchSharp,
+} from "ionicons/icons";
 import { useEffect, useRef, useState } from "react";
 import RecipesListItem from "../components/RecipesListItem";
 
@@ -101,6 +107,21 @@ const Recipes: React.FC = () => {
       setResults(recipes);
     }
   };
+  const search = (e: any) => {
+    const searchTerm = e.currentTarget.value;
+    console.log(searchTerm);
+
+    if (searchTerm !== "") {
+      const searchTermLower = searchTerm.toLowerCase();
+      const newResults = recipes.filter((e: any) =>
+        e.data().name.toLowerCase().includes(searchTermLower)
+      );
+      setResults(newResults);
+    } else {
+      setResults(recipes);
+    }
+  };
+
   return (
     <IonPage>
       <IonHeader>
@@ -108,6 +129,12 @@ const Recipes: React.FC = () => {
       </IonHeader>
 
       <IonContent fullscreen>
+        <IonSearchbar
+          onIonChange={(e) => search(e)}
+          id="searchbar"
+          searchIcon={searchSharp}
+          placeholder="Search Recipes"
+        />
         <IonAccordionGroup
           ref={accordionGroup}
           onIonChange={accordionGroupChange}
@@ -204,7 +231,7 @@ const Recipes: React.FC = () => {
                     <RecipesListItem index={index} recipe={recipe.data()} />
                   );
                 })}
-                <IonItem>k</IonItem>
+                <IonItem> </IonItem>
               </IonList>
             </div>
           )
