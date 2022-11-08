@@ -14,23 +14,37 @@ import {
   IonLabel,
   IonList,
   IonPage,
+  IonSearchbar,
   useIonModal,
   useIonToast,
 } from "@ionic/react";
-import { trashBin, addCircleOutline, addOutline } from "ionicons/icons";
+import {
+  trashBin,
+  addCircleOutline,
+  addOutline,
+  searchSharp,
+} from "ionicons/icons";
 import CreateItemModal from "../components/CreateItemModal";
 import EmptyContainer from "../components/EmptyContainer";
 import BrandHeader from "../components/BrandHeader";
 import { useData } from "../data/DataContext";
 
 import "./Kitchen.css";
+import { useState } from "react";
 
 const Kitchen: React.FC = () => {
-  const { kitchen_state, kitchen_loading, addKitchenItem, removeKitchenItem, getKitchenCategories} = useData().kitchen;
+  const {
+    kitchen_state,
+    kitchen_loading,
+    addKitchenItem,
+    removeKitchenItem,
+    getKitchenCategories,
+  } = useData().kitchen;
   const fridgeList = !kitchen_loading ? kitchen_state.docs : [];
   const { addShoppingItem } = useData().shopping;
   const categories = getKitchenCategories();
   const [presentToast, dismissToast] = useIonToast();
+  const [results, setResults] = useState(fridgeList);
 
   const addToShoppingList = (item: any) => {
     addShoppingItem(item);
@@ -53,6 +67,20 @@ const Kitchen: React.FC = () => {
     initialBreakpoint: 0.75,
     backdropBreakpoint: 0.75,
   };
+  const search = (e: any) => {
+    const searchTerm = e.currentTarget.value;
+    console.log(searchTerm);
+
+    if (searchTerm !== "") {
+      const searchTermLower = searchTerm.toLowerCase();
+      const newResults = fridgeList.filter((e: any) =>
+        e.data().name.toLowerCase().includes(searchTermLower)
+      );
+      setResults(newResults);
+    } else {
+      setResults(fridgeList);
+    }
+  };
 
   return (
     <IonPage>
@@ -60,6 +88,13 @@ const Kitchen: React.FC = () => {
         <BrandHeader />
       </IonHeader>
       <IonContent fullscreen>
+        <IonSearchbar
+          onIonChange={(e) => search(e)}
+          id="searchbar"
+          searchIcon={searchSharp}
+          placeholder="Search Ingredients"
+        />
+
         {!kitchen_loading && fridgeList.length > 0 ? (
           <IonList>
             {categories.map((category: any, i: number) => {
@@ -69,7 +104,7 @@ const Kitchen: React.FC = () => {
                     <IonLabel className="category-label">{category}</IonLabel>
                   </IonItemDivider>
 
-                  {fridgeList.map((item: any, index: number) => {
+                  {results.map((item: any, index: number) => {
                     const ingredient = item.data();
                     return ingredient.category === category ? (
                       <IonItemSliding key={index}>

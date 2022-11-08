@@ -35,7 +35,6 @@
   left: 105px;
   width: 50%;
   padding: 0.5rem;
-  color: #fff;
 }
 .buttons {
   display: flex;
@@ -82,4 +81,12 @@
   padding-bottom: 0px;
   background: rgba(var(--ion-text-color-rgb, 0, 0, 0), 0.065);
 
+}
+.itemLabel {
+  font-size: small !important;
+  white-space: normal !important;
+}
+.itembuttons {
+  margin: 0 !important;
+  font-size: small !important
 }
