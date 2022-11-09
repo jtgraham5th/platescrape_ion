@@ -17,7 +17,12 @@ import {
   useIonModal,
   useIonToast,
 } from "@ionic/react";
-import { trashBin, addCircleOutline, addOutline, searchSharp } from "ionicons/icons";
+import {
+  trashBin,
+  addCircleOutline,
+  addOutline,
+  searchSharp,
+} from "ionicons/icons";
 import CreateItemModal from "../components/CreateItemModal";
 import BrandHeader from "../components/BrandHeader";
 import EmptyContainer from "../components/EmptyContainer";
@@ -25,6 +30,7 @@ import { useData } from "../data/DataContext";
 
 import "./Shopping.css";
 import { useState } from "react";
+import RecipeTracker from "../components/RecipeTracker";
 
 const Shopping: React.FC = () => {
   const {
@@ -38,6 +44,13 @@ const Shopping: React.FC = () => {
   const { addKitchenItem } = useData().kitchen;
   const categories = getShoppingListCategories();
   const [results, setResults] = useState(shoppingList);
+  const [selectedRecipe, setSelectedRecipe] = useState<{
+    name: string;
+    ingredients: string[];
+  }>({
+    name: "",
+    ingredients: [],
+  });
   const [presentToast, dismissToast] = useIonToast();
   const addToKitchen = (item: any) => {
     addKitchenItem(item);
@@ -80,11 +93,15 @@ const Shopping: React.FC = () => {
         <BrandHeader />
       </IonHeader>
       <IonContent fullscreen>
-      <IonSearchbar
+        <IonSearchbar
           onIonChange={(e) => search(e)}
           id="searchbar"
           searchIcon={searchSharp}
           placeholder="Search Ingredients"
+        />
+        <RecipeTracker
+          setSelectedRecipe={setSelectedRecipe}
+          selectedRecipe={selectedRecipe}
         />
         {!shoppingList_loading && shoppingList.length > 0 ? (
           <IonList>
@@ -94,12 +111,20 @@ const Shopping: React.FC = () => {
                   <IonItemDivider>
                     <IonLabel className="category-label">{category}</IonLabel>
                   </IonItemDivider>
-
+                  {/* if selectedRecipe array contains index */}
                   {results.map((item: any, index: number) => {
                     const ingredient = item.data();
                     return ingredient.category === category ? (
                       <IonItemSliding key={index} className="slider">
-                        <IonItem lines="none" detail={false}>
+                        <IonItem
+                          lines="none"
+                          className={
+                            selectedRecipe.ingredients.includes(ingredient.name)
+                              ? "highlight"
+                              : ""
+                          }
+                          detail={false}
+                        >
                           <IonLabel>
                             <h4>{ingredient.name}</h4>
                           </IonLabel>
