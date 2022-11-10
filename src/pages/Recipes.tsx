@@ -3,6 +3,7 @@ import {
   IonAccordion,
   IonAccordionGroup,
   IonButton,
+  IonButtons,
   IonCol,
   IonContent,
   IonHeader,
@@ -15,6 +16,7 @@ import {
   IonSegment,
   IonSegmentButton,
   IonToggle,
+  IonToolbar,
   useIonModal,
 } from "@ionic/react";
 import { Virtuoso } from "react-virtuoso";
@@ -27,7 +29,7 @@ import { useData } from "../data/DataContext";
 
 import "./Recipes.css";
 import {
-  filterOutline,
+  filterCircleOutline,
   gridOutline,
   listOutline,
   searchSharp,
@@ -126,16 +128,53 @@ const Recipes: React.FC = () => {
     <IonPage>
       <IonHeader>
         <BrandHeader />
+        <IonToolbar>
+          <IonSearchbar
+            onIonChange={(e) => search(e)}
+            id="searchbar"
+            color="light"
+            searchIcon={searchSharp}
+            placeholder="Search Recipes"
+          />
+          <IonButtons slot="end">
+            <IonButton onClick={() => setResults([])}>
+              <IonIcon size="large" icon={filterCircleOutline} />
+            </IonButton>
+          </IonButtons>
+        </IonToolbar>
+        <IonRow className="customizeView">
+          <IonCol size="8">
+            <IonLabel>Show User Created Recipes</IonLabel>
+            <IonToggle
+              checked={userCreated}
+              onIonChange={(e: any) => setUserCreated(e.detail.checked)}
+            />
+          </IonCol>
+          <IonCol size="4">
+            <IonSegment onIonChange={(e: any) => setView(e.detail.value)}>
+              <IonSegmentButton value="grid">
+                <IonIcon icon={gridOutline} />
+              </IonSegmentButton>
+              <IonSegmentButton value="list">
+                <IonIcon icon={listOutline} />
+              </IonSegmentButton>
+            </IonSegment>
+          </IonCol>
+        </IonRow>
+
+        <IonButton
+          className="create-recipe"
+          expand="full"
+          shape="round"
+          onClick={() => present(modalOptions)}
+        >
+          <IonIcon src={PostAddIcon} />
+          Create Your Own Recipe
+        </IonButton>
       </IonHeader>
 
       <IonContent fullscreen>
-        <IonSearchbar
-          onIonChange={(e) => search(e)}
-          id="searchbar"
-          searchIcon={searchSharp}
-          placeholder="Search Recipes"
-        />
-        <IonAccordionGroup
+        {/* <IonAccordionGroup
           ref={accordionGroup}
           onIonChange={accordionGroupChange}
         >
@@ -176,44 +215,16 @@ const Recipes: React.FC = () => {
                     </IonSegmentButton>
                   );
                 })}
-            </IonSegment>
+                </IonSegment>
           </IonAccordion>
-        </IonAccordionGroup>
-        <IonItem>
-          <IonRow className="customizeView">
-            <IonCol size="8">
-              <IonLabel>Show User Created Recipes</IonLabel>
-              <IonToggle
-                checked={userCreated}
-                onIonChange={(e: any) => setUserCreated(e.detail.checked)}
-              />
-            </IonCol>
-            <IonCol size="4">
-              <IonSegment onIonChange={(e: any) => setView(e.detail.value)}>
-                <IonSegmentButton value="grid">
-                  <IonIcon icon={gridOutline} />
-                </IonSegmentButton>
-                <IonSegmentButton value="list">
-                  <IonIcon icon={listOutline} />
-                </IonSegmentButton>
-              </IonSegment>
-            </IonCol>
-          </IonRow>
-        </IonItem>
-        <IonButton
-          className="create-recipe"
-          expand="full"
-          shape="round"
-          onClick={() => present(modalOptions)}
-        >
-          <IonIcon src={PostAddIcon} />
-          Create Your Own Recipe
-        </IonButton>
+        </IonAccordionGroup> */}
+        {/* <IonItem>
+        </IonItem> */}
 
         {results.length > 0 ? (
           view === "grid" ? (
             <Virtuoso
-              style={{ height: "70%", paddingBottom: "3rem" }}
+              style={{ height: "100%", paddingBottom: "3rem" }}
               className="container"
               data={results}
               itemContent={(index: number, recipe: any) => {
@@ -228,7 +239,7 @@ const Recipes: React.FC = () => {
             />
           ) : (
             <Virtuoso
-              style={{ height: "50%", paddingBottom: "3rem" }}
+              style={{ height: "100%", paddingBottom: "3rem" }}
               className="recipeList"
               data={results}
               itemContent={(index: number, recipe: any) => {

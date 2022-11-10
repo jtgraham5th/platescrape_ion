@@ -13,6 +13,7 @@ import {
   IonLabel,
   IonPage,
   IonSearchbar,
+  IonToolbar,
   useIonModal,
   useIonToast,
 } from "@ionic/react";
@@ -57,7 +58,7 @@ const Shopping: React.FC = () => {
     setResults(getShoppingList());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shoppingList_state]);
- 
+
   const [presentToast, dismissToast] = useIonToast();
   const addToKitchen = (item: any) => {
     addKitchenItem(item);
@@ -97,23 +98,26 @@ const Shopping: React.FC = () => {
     <IonPage>
       <IonHeader>
         <BrandHeader />
-      </IonHeader>
-      <IonContent fullscreen>
-        <IonSearchbar
-          onIonChange={(e) => search(e)}
-          id="searchbar"
-          searchIcon={searchSharp}
-          placeholder="Search Ingredients"
-        />
+        <IonToolbar>
+          <IonSearchbar
+            onIonChange={(e) => search(e)}
+            id="searchbar"
+            color="light"
+            searchIcon={searchSharp}
+            placeholder="Search Ingredients"
+          />
+        </IonToolbar>
         <RecipeTracker
           list_state={shoppingList}
           setSelectedRecipe={setSelectedRecipe}
           selectedRecipe={selectedRecipe}
           addItem={addShoppingItem}
         />
+      </IonHeader>
+      <IonContent fullscreen>
         {!shoppingList_loading && shoppingList.length > 0 ? (
           <Virtuoso
-            style={{ height: "70%", paddingBottom: "3rem" }}
+            style={{ height: "85%", paddingBottom: "3rem" }}
             // className="recipeList"
             data={categories}
             itemContent={(index: number, category: any) => {
@@ -129,7 +133,9 @@ const Shopping: React.FC = () => {
                         <IonItem
                           lines="none"
                           className={
-                            selectedRecipe.ingredients.includes(ingredient.name)
+                            selectedRecipe.ingredients.some(
+                              (item: any) => item.name === ingredient.name
+                            )
                               ? "highlight"
                               : ""
                           }

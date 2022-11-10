@@ -27,7 +27,7 @@ const RecipeTracker: React.FC<{
   // const shoppingList = !shoppingList_loading ? shoppingList_state.docs : [];
   const recipes = !recipes_loading ? recipes_state.docs : [];
 
-  const [results, setResults] = useState<any[]>([]);
+  const [activeRecipes, setActiveRecipes] = useState<any[]>([]);
   const [missingIngredients, setMissingIngredients] = useState<any[]>([]);
   const Popover = () => (
     <IonContent>
@@ -54,7 +54,7 @@ const RecipeTracker: React.FC<{
         </IonList>
       ) : (
         <IonList>
-          <IonItem className="popoverHeader">
+          <IonItem className="popoverHeader ready">
             <small>You have everything you need to make this recipe!</small>
           </IonItem>
         </IonList>
@@ -89,7 +89,7 @@ const RecipeTracker: React.FC<{
       }
     });
 
-    setResults(tempRecipes);
+    setActiveRecipes(tempRecipes);
     // eslint-disable-next-line
   }, []);
   const getRecipeInfo = (e: any, recipe: any) => {
@@ -110,7 +110,7 @@ const RecipeTracker: React.FC<{
 
     for (const ingredient of recipe.ingredients) {
       if (tempShoppingList.some((item) => item.name === ingredient.name)) {
-        ingredientsList.push(ingredient.name);
+        ingredientsList.push(ingredient);
       } else {
         missingIngredients.push(ingredient);
       }
@@ -133,7 +133,7 @@ const RecipeTracker: React.FC<{
     <>
       <div className="recipe-tracker-header">Recipes in this list:</div>
       <IonRow className="recipe-tracker">
-        {results.map((recipe: any) => {
+        {activeRecipes.map((recipe: any) => {
           return (
             <IonChip
               outline={selectedRecipe.name !== recipe.name}

@@ -4,3 +4,9 @@
   ion-fab {
     bottom: 5rem !important
   }
+  ion-label {
+    margin: 0.5rem !important
+  }
+  ion-item {
+    --min-height: 25px;
+  }

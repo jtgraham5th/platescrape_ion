@@ -14,6 +14,7 @@ import {
   IonLabel,
   IonPage,
   IonSearchbar,
+  IonToolbar,
   useIonModal,
   useIonToast,
 } from "@ionic/react";
@@ -54,10 +55,10 @@ const Kitchen: React.FC = () => {
     name: "",
     ingredients: [],
   });
-  
+
   useEffect(() => {
     setResults(getKitchenList());
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kitchen_state]);
 
   const addToShoppingList = (item: any) => {
@@ -99,25 +100,27 @@ const Kitchen: React.FC = () => {
     <IonPage>
       <IonHeader>
         <BrandHeader />
-      </IonHeader>
-      <IonContent fullscreen>
-        <IonSearchbar
-          onIonChange={(e) => search(e)}
-          id="searchbar"
-          searchIcon={searchSharp}
-          placeholder="Search Ingredients"
-        />
+        <IonToolbar>
+          <IonSearchbar
+            onIonChange={(e) => search(e)}
+            id="searchbar"
+            color="light"
+            searchIcon={searchSharp}
+            placeholder="Search Ingredients"
+          />
+        </IonToolbar>
         <RecipeTracker
           list_state={fridgeList}
           setSelectedRecipe={setSelectedRecipe}
           selectedRecipe={selectedRecipe}
           addItem={addKitchenItem}
         />
-
+      </IonHeader>
+      <IonContent fullscreen>
         {!kitchen_loading && fridgeList.length > 0 ? (
           <Virtuoso
-            style={{ height: "70%", paddingBottom: "3rem" }}
-            // className="recipeList"
+            style={{ height: "85%", paddingBottom: "3rem" }}
+            className="recipeList"
             data={categories}
             itemContent={(index: number, category: any) => {
               return (
@@ -126,14 +129,15 @@ const Kitchen: React.FC = () => {
                     <IonLabel className="category-label">{category}</IonLabel>
                   </IonItemDivider>
                   {results.map((item: any, index: number) => {
-                    const ingredient = item.data();
-
+                    const ingredient = item.name ? item : item.data();
                     return ingredient.category === category ? (
                       <IonItemSliding key={index}>
                         <IonItem
                           lines="none"
                           className={
-                            selectedRecipe.ingredients.includes(ingredient.name)
+                            selectedRecipe.ingredients.some(
+                              (item: any) => item.name === ingredient.name
+                            )
                               ? "highlight"
                               : ""
                           }
