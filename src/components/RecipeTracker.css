@@ -19,3 +19,18 @@ ion-popover {
 ion-popover > ion-content {
   font-size: larger;
 }
+ion-popover::part(content) {
+  box-shadow: 0px 0px 5px silver !important;
+}
+.recipe-tracker-header {
+    padding-left: 1rem;
+    padding-bottom: 0.3rem;
+    font-size: 16px;
+    font-weight: 700 ;
+}
+.recipe-tracker {
+    padding-bottom: 0.5rem;
+    display: block;
+    white-space: nowrap;
+    overflow-x: auto !important;
+}

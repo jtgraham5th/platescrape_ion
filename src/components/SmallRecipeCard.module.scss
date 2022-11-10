@@ -4,6 +4,7 @@
   padding: 0px;
   background: #f8f8ff;
   box-shadow: rgb(0 77 64 / 30%) 0px 4px 16px;
+  break-inside: avoid;
 
   ion-button {
     --padding-start: 0.3em;

@@ -11,7 +11,6 @@ import {
   IonItemOptions,
   IonItemSliding,
   IonLabel,
-  IonList,
   IonPage,
   IonSearchbar,
   useIonModal,
@@ -29,8 +28,9 @@ import EmptyContainer from "../components/EmptyContainer";
 import { useData } from "../data/DataContext";
 
 import "./Shopping.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import RecipeTracker from "../components/RecipeTracker";
+import { Virtuoso } from "react-virtuoso";
 
 const Shopping: React.FC = () => {
   const {
@@ -38,12 +38,13 @@ const Shopping: React.FC = () => {
     shoppingList_loading,
     addShoppingItem,
     removeShoppingItem,
+    getShoppingList,
     getShoppingListCategories,
   } = useData().shopping;
-  const shoppingList = !shoppingList_loading ? shoppingList_state.docs : [];
   const { addKitchenItem } = useData().kitchen;
+  const shoppingList = getShoppingList();
   const categories = getShoppingListCategories();
-  const [results, setResults] = useState(shoppingList);
+  const [results, setResults] = useState(getShoppingList());
   const [selectedRecipe, setSelectedRecipe] = useState<{
     name: string;
     ingredients: string[];
@@ -51,6 +52,12 @@ const Shopping: React.FC = () => {
     name: "",
     ingredients: [],
   });
+
+  useEffect(() => {
+    setResults(getShoppingList());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shoppingList_state]);
+ 
   const [presentToast, dismissToast] = useIonToast();
   const addToKitchen = (item: any) => {
     addKitchenItem(item);
@@ -74,7 +81,6 @@ const Shopping: React.FC = () => {
   };
   const search = (e: any) => {
     const searchTerm = e.currentTarget.value;
-    console.log(searchTerm);
 
     if (searchTerm !== "") {
       const searchTermLower = searchTerm.toLowerCase();
@@ -100,18 +106,22 @@ const Shopping: React.FC = () => {
           placeholder="Search Ingredients"
         />
         <RecipeTracker
+          list_state={shoppingList}
           setSelectedRecipe={setSelectedRecipe}
           selectedRecipe={selectedRecipe}
+          addItem={addShoppingItem}
         />
         {!shoppingList_loading && shoppingList.length > 0 ? (
-          <IonList>
-            {categories.map((category: any, i: number) => {
+          <Virtuoso
+            style={{ height: "70%", paddingBottom: "3rem" }}
+            // className="recipeList"
+            data={categories}
+            itemContent={(index: number, category: any) => {
               return (
-                <IonItemGroup key={i}>
+                <IonItemGroup key={index}>
                   <IonItemDivider>
                     <IonLabel className="category-label">{category}</IonLabel>
                   </IonItemDivider>
-                  {/* if selectedRecipe array contains index */}
                   {results.map((item: any, index: number) => {
                     const ingredient = item.data();
                     return ingredient.category === category ? (
@@ -163,8 +173,8 @@ const Shopping: React.FC = () => {
                   })}
                 </IonItemGroup>
               );
-            })}
-          </IonList>
+            }}
+          />
         ) : (
           <EmptyContainer name="Shopping List" />
         )}
