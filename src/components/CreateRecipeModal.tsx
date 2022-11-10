@@ -229,10 +229,10 @@ const CreateRecipeModal: React.FC<{
     dismiss();
   };
   const additionalIngredient = (e: any) => {
-    ingredientAppend({ name: "", amount: "", category: "" });
+    ingredientAppend({ name: "", amount: "", category: "" },{ shouldFocus: true });
   };
   const additionalDirection = (e: any) => {
-    directionAppend({ step: "" });
+    directionAppend({ step: "" }, { shouldFocus: false });
   };
   const parseDirections = (recipe: any) => {
     let parsedDirections: string[] = [];
