@@ -23,11 +23,7 @@ import { arrowForwardOutline, arrowBackOutline } from "ionicons/icons";
 import { useRef, useState, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useData } from "../data/DataContext";
-import {
-  ref,
-  getDownloadURL,
-  uploadString,
-} from "firebase/storage";
+import { ref, getDownloadURL, uploadString } from "firebase/storage";
 import { useAuth } from "../data/AuthContext";
 
 import styles from "./CreateModal.module.scss";
@@ -99,25 +95,30 @@ const CreateRecipeModal: React.FC<{
 
   const uploadPhoto = async (recipeImage: any, recipeName: string) => {
     // let webpath: any | URL = recipeImage;
-    const storageRef = ref(storage, `${userID}/${recipeName}`);
-    // const response: string = await fetch(webpath)
-    //   .then((res) => res.blob())
-    //   // we create a new request using the Request() constructor, then use it to fetch a JPG.
-    //   .then(
-    //     async (myBlob: any) =>
-    // await uploadBytes(storageRef, myBlob).then( <---- Use with blobs not image strings
-    const response = await uploadString(
-      storageRef,
-      recipeImage,
-      "data_url"
-    ).then(
-      async (snapshot) =>
-        await getDownloadURL(ref(storage, `${userID}/${recipeName}`)).then(
-          (url) => url as string
-        )
-    );
-    const photoUrl: string = response;
-    return photoUrl;
+    if (recipeImage) {
+      const storageRef = ref(storage, `${userID}/${recipeName}`);
+      // const response: string = await fetch(webpath)
+      //   .then((res) => res.blob())
+      //   // we create a new request using the Request() constructor, then use it to fetch a JPG.
+      //   .then(
+      //     async (myBlob: any) =>
+      // await uploadBytes(storageRef, myBlob).then( <---- Use with blobs not image strings
+      const response = await uploadString(
+        storageRef,
+        recipeImage,
+        "data_url"
+      ).then(
+        async (snapshot) =>
+          await getDownloadURL(ref(storage, `${userID}/${recipeName}`)).then(
+            (url) => url as string
+          )
+      );
+      console.log(response);
+      const photoUrl: string = response;
+      return photoUrl;
+    } else {
+      return "";
+    }
   };
 
   const { register, handleSubmit, unregister, control } = useForm({
