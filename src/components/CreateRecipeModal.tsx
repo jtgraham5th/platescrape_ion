@@ -229,7 +229,7 @@ const CreateRecipeModal: React.FC<{
     dismiss();
   };
   const additionalIngredient = (e: any) => {
-    ingredientAppend({ name: "", amount: "", category: "" },{ shouldFocus: true });
+    ingredientAppend({ name: "", amount: "", category: "" },{ shouldFocus: false });
   };
   const additionalDirection = (e: any) => {
     directionAppend({ step: "" }, { shouldFocus: false });
@@ -345,11 +345,6 @@ const CreateRecipeModal: React.FC<{
                           placeholder="category"
                           multiple={true}
                           {...register("category.course")}
-                          // value={
-                          //   recipeData?.category.course
-                          //     ? [...recipeData.category.course]
-                          //     : []
-                          // }
                         >
                           {recipeCategories.course.map(
                             (category: any, i: number) => (
@@ -369,11 +364,6 @@ const CreateRecipeModal: React.FC<{
                           placeholder="category"
                           multiple={true}
                           {...register("category.cuisine")}
-                          // value={
-                          //   recipeData?.category.cuisine
-                          //     ? [...recipeData.category.cuisine]
-                          //     : []
-                          // }
                         >
                           {recipeCategories.cuisine.map(
                             (category: any, i: number) => (
@@ -393,11 +383,6 @@ const CreateRecipeModal: React.FC<{
                           placeholder="category"
                           multiple={true}
                           {...register("category.dish")}
-                          // value={
-                          //   recipeData?.category.dish
-                          //     ? [...recipeData.category.dish]
-                          //     : []
-                          // }
                         >
                           {recipeCategories.dish.map(
                             (category: any, i: number) => (
@@ -417,11 +402,6 @@ const CreateRecipeModal: React.FC<{
                           placeholder="category"
                           multiple={true}
                           {...register("category.nutrition")}
-                          // value={
-                          //   recipeData?.category.nutrition
-                          //     ? [...recipeData.category.nutrition]
-                          //     : []
-                          // }
                         >
                           {recipeCategories.nutrition.map(
                             (category: any, i: number) => (
@@ -441,11 +421,6 @@ const CreateRecipeModal: React.FC<{
                           placeholder="category"
                           multiple={true}
                           {...register("category.technique")}
-                          // value={
-                          //   recipeData?.category.technique
-                          //     ? [...recipeData.category.technique]
-                          //     : []
-                          // }
                         >
                           {recipeCategories.technique.map(
                             (category: any, i: number) => (
@@ -502,10 +477,12 @@ const CreateRecipeModal: React.FC<{
                 ))}
                 <IonRow style={{ width: "100%" }}>
                   <IonCol size="12">
-                    <IonInput
-                      placeholder=" + Add Additional Step"
+                  <IonButton
+                        expand="full"
+                        shape="round"
+                        type="button"
                       onClick={additionalDirection}
-                    ></IonInput>
+                    >+ Add Additional Step</IonButton>
                   </IonCol>
                 </IonRow>
               </IonItem>
