@@ -1,4 +1,4 @@
-.container {
+.container > [data-viewport-type="element"] > [data-test-id="virtuoso-item-list"] {
   column-count: 2;
   padding: 3px;
 }
@@ -22,7 +22,7 @@
 }
 
 ion-popover.uploadImgPopover::part(content) {
-  left: 215px !important
+  left: 215px !important;
 }
 .recipeList {
   height: 78%;

@@ -9,7 +9,6 @@ import {
   IonIcon,
   IonItem,
   IonLabel,
-  IonList,
   IonPage,
   IonRow,
   IonSearchbar,
@@ -18,6 +17,7 @@ import {
   IonToggle,
   useIonModal,
 } from "@ionic/react";
+import { Virtuoso } from "react-virtuoso";
 import SmallRecipeCard from "../components/SmallRecipeCard";
 import CreateRecipeModal from "../components/CreateRecipeModal";
 import { PostAddIcon } from "../components/icons";
@@ -212,8 +212,11 @@ const Recipes: React.FC = () => {
 
         {results.length > 0 ? (
           view === "grid" ? (
-            <div className="container">
-              {results.map((recipe: any, index: number) => {
+            <Virtuoso
+              style={{ height: "70%", paddingBottom: "3rem" }}
+              className="container"
+              data={results}
+              itemContent={(index: number, recipe: any) => {
                 return (
                   <SmallRecipeCard
                     key={index}
@@ -221,21 +224,29 @@ const Recipes: React.FC = () => {
                     recipe={recipe.data()}
                   />
                 );
-              })}
-            </div>
+              }}
+            />
           ) : (
-            <div className="recipeList">
-              <IonList>
-                {results.map((recipe: any, index: number) => {
-                  return (
-                    <RecipesListItem index={index} recipe={recipe.data()} />
-                  );
-                })}
-                <IonItem> </IonItem>
-              </IonList>
-            </div>
+            <Virtuoso
+              style={{ height: "50%", paddingBottom: "3rem" }}
+              className="recipeList"
+              data={results}
+              itemContent={(index: number, recipe: any) => {
+                return <RecipesListItem index={index} recipe={recipe.data()} />;
+              }}
+            />
           )
         ) : (
+          // <div className="recipeList">
+          //   <IonList>
+          //     {results.map((recipe: any, index: number) => {
+          //       return (
+          //         <RecipesListItem index={index} recipe={recipe.data()} />
+          //       );
+          //     })}
+          //     <IonItem> </IonItem>
+          //   </IonList>
+          // </div>
           <EmptyContainer name="Recipes" />
         )}
       </IonContent>

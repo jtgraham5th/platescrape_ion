@@ -12,7 +12,6 @@ import {
   IonItemOptions,
   IonItemSliding,
   IonLabel,
-  IonList,
   IonPage,
   IonSearchbar,
   useIonModal,
@@ -30,21 +29,36 @@ import BrandHeader from "../components/BrandHeader";
 import { useData } from "../data/DataContext";
 
 import "./Kitchen.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import RecipeTracker from "../components/RecipeTracker";
+import { Virtuoso } from "react-virtuoso";
 
 const Kitchen: React.FC = () => {
   const {
     kitchen_state,
     kitchen_loading,
+    getKitchenList,
     addKitchenItem,
     removeKitchenItem,
     getKitchenCategories,
   } = useData().kitchen;
-  const fridgeList = !kitchen_loading ? kitchen_state.docs : [];
   const { addShoppingItem } = useData().shopping;
+  const fridgeList = !kitchen_loading ? kitchen_state.docs : [];
   const categories = getKitchenCategories();
   const [presentToast, dismissToast] = useIonToast();
-  const [results, setResults] = useState(fridgeList);
+  const [results, setResults] = useState(getKitchenList());
+  const [selectedRecipe, setSelectedRecipe] = useState<{
+    name: string;
+    ingredients: string[];
+  }>({
+    name: "",
+    ingredients: [],
+  });
+  
+  useEffect(() => {
+    setResults(getKitchenList());
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kitchen_state]);
 
   const addToShoppingList = (item: any) => {
     addShoppingItem(item);
@@ -69,7 +83,6 @@ const Kitchen: React.FC = () => {
   };
   const search = (e: any) => {
     const searchTerm = e.currentTarget.value;
-    console.log(searchTerm);
 
     if (searchTerm !== "") {
       const searchTermLower = searchTerm.toLowerCase();
@@ -94,21 +107,38 @@ const Kitchen: React.FC = () => {
           searchIcon={searchSharp}
           placeholder="Search Ingredients"
         />
+        <RecipeTracker
+          list_state={fridgeList}
+          setSelectedRecipe={setSelectedRecipe}
+          selectedRecipe={selectedRecipe}
+          addItem={addKitchenItem}
+        />
 
         {!kitchen_loading && fridgeList.length > 0 ? (
-          <IonList>
-            {categories.map((category: any, i: number) => {
+          <Virtuoso
+            style={{ height: "70%", paddingBottom: "3rem" }}
+            // className="recipeList"
+            data={categories}
+            itemContent={(index: number, category: any) => {
               return (
-                <IonItemGroup key={i}>
+                <IonItemGroup key={index}>
                   <IonItemDivider>
                     <IonLabel className="category-label">{category}</IonLabel>
                   </IonItemDivider>
-
                   {results.map((item: any, index: number) => {
                     const ingredient = item.data();
+
                     return ingredient.category === category ? (
                       <IonItemSliding key={index}>
-                        <IonItem lines="none" detail={false}>
+                        <IonItem
+                          lines="none"
+                          className={
+                            selectedRecipe.ingredients.includes(ingredient.name)
+                              ? "highlight"
+                              : ""
+                          }
+                          detail={false}
+                        >
                           <IonLabel>
                             <h4>{ingredient.name}</h4>
                           </IonLabel>
@@ -147,8 +177,8 @@ const Kitchen: React.FC = () => {
                   })}
                 </IonItemGroup>
               );
-            })}
-          </IonList>
+            }}
+          />
         ) : (
           <EmptyContainer name="Kitchen" />
         )}

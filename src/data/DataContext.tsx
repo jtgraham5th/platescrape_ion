@@ -23,7 +23,7 @@ type DataContextProps = {
   recipes: any;
   kitchen: any;
   shopping: any;
-  storage: FirebaseStorage
+  storage: FirebaseStorage;
 };
 
 const DataContext = React.createContext<DataContextProps>(undefined!);
@@ -486,6 +486,11 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
       alert(err.message);
     }
   };
+  const getShoppingList = () => {
+    if (shoppingList_state?.docs) {
+      return shoppingList_state?.docs;
+    }
+  };
   const getShoppingListCategories = () => {
     if (shoppingList_categories_state?.data()?.activeCategories) {
       return shoppingList_categories_state?.data()?.activeCategories;
@@ -552,7 +557,11 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
     });
     batch.commit();
   };
-
+  const getKitchenList = () => {
+    if (kitchen_state?.docs) {
+      return kitchen_state?.docs;
+    }
+  };
   const addKitchenItem = async (newItem: any) => {
     if (
       kitchen_state?.docs.find(
@@ -616,6 +625,7 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
   const shopping = {
     shoppingList_state,
     shoppingList_loading,
+    getShoppingList,
     getShoppingListCategories,
     getAllShoppingListCategories,
     getAllIngredientCategories,
@@ -626,6 +636,7 @@ export function DataProvider(props: React.PropsWithChildren<any>) {
   const kitchen = {
     kitchen_state,
     kitchen_loading,
+    getKitchenList,
     getKitchenCategories,
     addRecipeIngredientsKitchen,
     addKitchenItem,
