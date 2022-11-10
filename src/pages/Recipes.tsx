@@ -1,14 +1,14 @@
 import {
-  AccordionGroupCustomEvent,
-  IonAccordion,
-  IonAccordionGroup,
+  // AccordionGroupCustomEvent,
+  // IonAccordion,
+  // IonAccordionGroup,
   IonButton,
   IonButtons,
   IonCol,
   IonContent,
   IonHeader,
   IonIcon,
-  IonItem,
+  // IonItem,
   IonLabel,
   IonPage,
   IonRow,
@@ -34,56 +34,56 @@ import {
   listOutline,
   searchSharp,
 } from "ionicons/icons";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import RecipesListItem from "../components/RecipesListItem";
 
 const Recipes: React.FC = () => {
   const {
-    getRecipesCategories,
+    // getRecipesCategories,
     recipes_state,
     recipes_loading,
-    recipes_categories_loading,
+    // recipes_categories_loading,
   } = useData().recipes;
   const recipes = !recipes_loading ? recipes_state.docs : [];
   const [present, dismiss] = useIonModal(CreateRecipeModal, {
     dismiss: () => dismiss(),
   });
-  const accordionGroup = useRef<null | HTMLIonAccordionGroupElement>(null);
-  const categories = !recipes_categories_loading ? getRecipesCategories() : [];
-  const [category, setCategory] = useState();
+  // const accordionGroup = useRef<null | HTMLIonAccordionGroupElement>(null);
+  // const categories = !recipes_categories_loading ? getRecipesCategories() : [];
+  // const [category, setCategory] = useState();
   const [userCreated, setUserCreated] = useState();
   const [results, setResults] = useState(recipes);
   const [view, setView] = useState("grid");
 
-  const toggleFilter = () => {
-    if (!accordionGroup.current) {
-      return;
-    }
-    const accordion = accordionGroup.current;
+  // const toggleFilter = () => {
+  //   if (!accordionGroup.current) {
+  //     return;
+  //   }
+  //   const accordion = accordionGroup.current;
 
-    if (accordion.value === "second") {
-      accordion.value = undefined;
-    } else {
-      accordion.value = "second";
-    }
-  };
-  const searchWithFilter = (selectedCategory: any) => {
-    if (category) {
-      const newResults = results.filter((e: any) => {
-        if (e.data().category[category]) {
-          return e
-            .data()
-            .category[category]?.find(
-              (e: any) => e["display-name"] === selectedCategory
-            );
-        }
-        return e;
-      });
-      setResults(newResults);
-    } else {
-      setResults(recipes);
-    }
-  };
+  //   if (accordion.value === "second") {
+  //     accordion.value = undefined;
+  //   } else {
+  //     accordion.value = "second";
+  //   }
+  // };
+  // const searchWithFilter = (selectedCategory: any) => {
+  //   if (category) {
+  //     const newResults = results.filter((e: any) => {
+  //       if (e.data().category[category]) {
+  //         return e
+  //           .data()
+  //           .category[category]?.find(
+  //             (e: any) => e["display-name"] === selectedCategory
+  //           );
+  //       }
+  //       return e;
+  //     });
+  //     setResults(newResults);
+  //   } else {
+  //     setResults(recipes);
+  //   }
+  // };
 
   const modalOptions = {
     onDidDismiss: () => dismiss(),
@@ -102,13 +102,13 @@ const Recipes: React.FC = () => {
     // eslint-disable-next-line
   }, [userCreated]);
 
-  const accordionGroupChange = (ev: AccordionGroupCustomEvent) => {
-    const selectedValue = ev.detail.value;
-    console.log(selectedValue);
-    if (selectedValue === undefined || selectedValue === "second") {
-      setResults(recipes);
-    }
-  };
+  // const accordionGroupChange = (ev: AccordionGroupCustomEvent) => {
+  //   const selectedValue = ev.detail.value;
+  //   console.log(selectedValue);
+  //   if (selectedValue === undefined || selectedValue === "second") {
+  //     setResults(recipes);
+  //   }
+  // };
   const search = (e: any) => {
     const searchTerm = e.currentTarget.value;
     console.log(searchTerm);
